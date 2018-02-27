@@ -4,13 +4,10 @@ using System.Runtime.Serialization;
 namespace ArchiveMonkey.Settings.Models
 {
     [DataContract]
-    public class ArchiveMonkeySettings
+    public partial class ArchiveMonkeySettings
     {
-        [DataMember(IsRequired = true)]
-        public string BasePath { get; set; }
-
         [DataMember]
-        public IList<Archive> DavidArchives { get; set; }
+        public IList<Archive> Archives { get; set; }
 
         [DataMember]
         public IList<ArchivingAction> ArchivingActions { get; set; }

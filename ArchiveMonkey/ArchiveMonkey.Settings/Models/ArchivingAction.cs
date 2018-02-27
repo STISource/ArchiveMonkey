@@ -3,7 +3,7 @@
 namespace ArchiveMonkey.Settings.Models
 {
     [DataContract]
-    public class ArchivingAction
+    public partial class ArchivingAction
     {
         [DataMember(IsRequired = true)]
         public ArchivingActionType ActionType { get; set; }
