@@ -4,9 +4,74 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ArchiveMonkey.Settings.Views"
+             xmlns:helpers="clr-namespace:ArchiveMonkey.Settings.Helpers"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
-        <Button Content="Harro" />
+             d:DesignHeight="400" d:DesignWidth="600">
+    <Grid Name="RootGrid">
+        <Grid.Resources>            
+            <helpers:BindingProxy x:Key="Proxy" Root="{Binding ElementName=RootGrid}" />
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="2*" />
+            <RowDefinition Height="3*" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="2*" />
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0" Content="Archives" FontSize="14" FontWeight="Bold" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Add" Command="{Binding AddArchiveCommand}" Margin="5,1,5,1" />
+                    <Button Content="Remove" Command="{Binding DeleteArchiveCommand}" Margin="5,1,5,1" />
+                </StackPanel>
+            </Grid>
+            <DataGrid Grid.Row="1" 
+                      ItemsSource="{Binding Settings.Archives}" 
+                      SelectedItem="{Binding SelectedArchive}" 
+                      AutoGenerateColumns="False"
+                      VerticalScrollBarVisibility="Auto"
+                      CanUserAddRows="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Name" Binding="{Binding DisplayName}" />
+                    <DataGridTextColumn Header="Path" Binding="{Binding Path}" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="2*" />
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0" Content="Actions" FontSize="14" FontWeight="Bold" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Add" Command="{Binding AddActionCommand}" Margin="5,1,5,1" />
+                    <Button Content="Remove" Command="{Binding DeleteActionCommand}" Margin="5,1,5,1" />
+                </StackPanel>
+            </Grid>
+            <DataGrid Grid.Row="2" 
+                      ItemsSource="{Binding Settings.ArchivingActions}" 
+                      SelectedItem="{Binding SelectedAction}" 
+                      AutoGenerateColumns="False"
+                      VerticalScrollBarVisibility="Auto"
+                      CanUserAddRows="False">
+                <DataGrid.Columns>
+                    <DataGridComboBoxColumn Header="From" ItemsSource="{Binding Root.DataContext.Settings.Archives, Source={StaticResource Proxy}}" SelectedItemBinding="{Binding InputArchive}" />
+                    <DataGridComboBoxColumn Header="To" ItemsSource="{Binding Root.DataContext.Settings.Archives, Source={StaticResource Proxy}}" SelectedItemBinding="{Binding OutputArchive}" />
+                    <DataGridComboBoxColumn Header="Action" ItemsSource="{Binding Root.DataContext.ArchivingActionTypes, Source={StaticResource Proxy}}" SelectedValuePath="ActionType" />                    
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
     </Grid>
 </UserControl>

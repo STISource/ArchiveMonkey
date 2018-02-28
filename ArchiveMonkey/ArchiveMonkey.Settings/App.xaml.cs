@@ -11,7 +11,7 @@ namespace ArchiveMonkey.Settings
     /// </summary>
     public partial class App : Application
     {
-        public App()
+        protected override void OnStartup(StartupEventArgs e)
         {
             var container = new UnityContainer();
             container.RegisterType<ISettingsService, JsonSettingsService>();
@@ -19,6 +19,6 @@ namespace ArchiveMonkey.Settings
             container.RegisterType<SettingsView>();
 
             new MainWindow(container.Resolve<SettingsView>()).Show();
-        }        
+        }
     }
 }
