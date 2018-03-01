@@ -115,6 +115,7 @@
     <Compile Include="..\ArchiveMonkey.Settings.Models\BasePropertyChanged.cs">
       <Link>Models\BasePropertyChanged.cs</Link>
     </Compile>
+    <Compile Include="Converters\BoolToVisibilityConverter.cs" />
     <Compile Include="Helpers\BindingProxy.cs" />
     <Compile Include="Helpers\SimpleCommand.cs" />
     <Compile Include="MainWindow.xaml.cs">

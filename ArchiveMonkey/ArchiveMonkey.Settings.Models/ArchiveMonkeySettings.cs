@@ -7,8 +7,8 @@ namespace ArchiveMonkey.Settings.Models
     [DataContract]
     public partial class ArchiveMonkeySettings : BasePropertyChanged
     {
-        private ICollection<Archive> archives;
-        private ICollection<ArchivingAction> archivingActions;
+        private ObservableCollection<Archive> archives;
+        private ObservableCollection<ArchivingAction> archivingActions;
 
         public ArchiveMonkeySettings()
         {
@@ -17,7 +17,7 @@ namespace ArchiveMonkey.Settings.Models
         }
 
         [DataMember]
-        public ICollection<Archive> Archives
+        public ObservableCollection<Archive> Archives
         {
             get
             {
@@ -35,7 +35,7 @@ namespace ArchiveMonkey.Settings.Models
         }
 
         [DataMember]
-        public ICollection<ArchivingAction> ArchivingActions
+        public ObservableCollection<ArchivingAction> ArchivingActions
         {
             get
             {
