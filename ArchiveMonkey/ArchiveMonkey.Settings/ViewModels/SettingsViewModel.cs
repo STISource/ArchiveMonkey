@@ -4,7 +4,7 @@ using System.Linq;
 using ArchiveMonkey.Settings.Helpers;
 using ArchiveMonkey.Settings.Models;
 using ArchiveMonkey.Settings.Properties;
-using ArchiveMonkey.Settings.Services;
+using ArchiveMonkey.Services;
 
 namespace ArchiveMonkey.Settings.ViewModels
 {
@@ -22,7 +22,7 @@ namespace ArchiveMonkey.Settings.ViewModels
         {
             this.settingsService = settingsService;
             this.Settings = settingsService.GetSettings();
-            this.ResolveDependencies();
+            this.Settings.ResolveDependencies();
 
             this.AddArchiveCommand = new SimpleCommand(() => true, this.NewArchive);
             this.DeleteArchiveCommand = new SimpleCommand(() => this.SelectedArchive != null, this.DeleteArchive);
@@ -140,12 +140,14 @@ namespace ArchiveMonkey.Settings.ViewModels
         {
             var archive = new Archive();
             this.Settings.Archives.Add(archive);
+            this.SelectedArchive = archive;
         }
 
         public void NewAction()
         {
             var action = new ArchivingAction();            
             this.Settings.ArchivingActions.Add(action);
+            this.SelectedAction = action;
         }
 
         public void DeleteArchive()
@@ -193,15 +195,6 @@ namespace ArchiveMonkey.Settings.ViewModels
                     break;
                 }
             }            
-        }
-
-        private void ResolveDependencies()
-        {
-            foreach(var action in this.Settings.ArchivingActions)
-            {
-                action.InputArchive = this.Settings.Archives.Single(x => x.ArchiveId == action.InputArchiveId);
-                action.OutputArchive = this.Settings.Archives.Single(x => x.ArchiveId == action.OutputArchiveId);
-            }
-        }
+        }        
     }
 }

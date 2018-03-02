@@ -1,5 +1,5 @@
 ﻿using System.Windows;
-using ArchiveMonkey.Settings.Services;
+using ArchiveMonkey.Services;
 using ArchiveMonkey.Settings.ViewModels;
 using ArchiveMonkey.Settings.Views;
 using Unity;

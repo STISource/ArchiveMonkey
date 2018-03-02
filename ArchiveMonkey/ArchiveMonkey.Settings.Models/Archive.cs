@@ -68,5 +68,10 @@ namespace ArchiveMonkey.Settings.Models
                 }
             }
         }
+
+        public override string ToString()
+        {
+            return this.DisplayName;
+        }
     }
 }

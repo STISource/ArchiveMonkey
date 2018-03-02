@@ -2,8 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:ArchiveMonkey.Settings.Views"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"              
              xmlns:helpers="clr-namespace:ArchiveMonkey.Settings.Helpers"
              xmlns:converters="clr-namespace:ArchiveMonkey.Settings.Converters"
              mc:Ignorable="d" 
@@ -17,7 +16,7 @@
             <RowDefinition Height="2*" />
             <RowDefinition Height="3*" />
             <RowDefinition Height="30" />
-            <RowDefinition Height="30" />
+            <RowDefinition Height="35" />
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <Grid.RowDefinitions>
@@ -35,15 +34,16 @@
                     <Button Content="Remove" Command="{Binding DeleteArchiveCommand}" Margin="5,1,5,1" />
                 </StackPanel>
             </Grid>
-            <DataGrid Grid.Row="1" 
+            <DataGrid Name="ArchivesDataGrid"
+                      Grid.Row="1" 
                       ItemsSource="{Binding Settings.Archives}" 
                       SelectedItem="{Binding SelectedArchive}" 
                       AutoGenerateColumns="False"
-                      VerticalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto"                      
                       CanUserAddRows="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Name" Binding="{Binding DisplayName}" />
-                    <DataGridTextColumn Header="Path" Binding="{Binding Path}" />
+                    <DataGridTextColumn Header="Name" SortMemberPath="DisplayName" Binding="{Binding DisplayName}" />
+                    <DataGridTextColumn Header="Path" SortMemberPath="Path" Binding="{Binding Path}" />
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
@@ -64,15 +64,16 @@
                     <Button Content="Remove" Command="{Binding DeleteActionCommand}" Margin="5,1,5,1" />
                 </StackPanel>
             </Grid>
-            <DataGrid Grid.Row="2" 
+            <DataGrid Name="ActionsDataGrid"
+                      Grid.Row="2" 
                       ItemsSource="{Binding Settings.ArchivingActions}" 
                       SelectedItem="{Binding SelectedAction}" 
                       AutoGenerateColumns="False"
                       VerticalScrollBarVisibility="Auto"
                       CanUserAddRows="False">
                 <DataGrid.Columns>
-                    <DataGridComboBoxColumn Header="From" ItemsSource="{Binding Root.DataContext.Settings.Archives, Source={StaticResource Proxy}}" SelectedItemBinding="{Binding InputArchive}" />
-                    <DataGridComboBoxColumn Header="To" ItemsSource="{Binding Root.DataContext.Settings.Archives, Source={StaticResource Proxy}}" SelectedItemBinding="{Binding OutputArchive}" />
+                    <DataGridComboBoxColumn Header="From" ItemsSource="{Binding Root.DataContext.Settings.Archives, Source={StaticResource Proxy}}" SortMemberPath="InputArchive.DisplayName" SelectedItemBinding="{Binding InputArchive}" />
+                    <DataGridComboBoxColumn Header="To" ItemsSource="{Binding Root.DataContext.Settings.Archives, Source={StaticResource Proxy}}" SortMemberPath="OutArchive.DisplayName" SelectedItemBinding="{Binding OutputArchive}" />
                     <DataGridComboBoxColumn Header="Action" ItemsSource="{Binding Root.DataContext.ArchivingActionTypes, Source={StaticResource Proxy}}" SelectedItemBinding="{Binding ActionType}" />                    
                 </DataGrid.Columns>
             </DataGrid>
@@ -82,7 +83,7 @@
             <TextBlock Text="{Binding ValidationErrorMessage}" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="20,0,0,0" Foreground="White" />
         </Grid>
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Save Settings" Command="{Binding SaveSettingsCommand}" Margin="5,1,5,1" />
+            <Button Content="Save Settings" Command="{Binding SaveSettingsCommand}" Margin="5,1,5,6" />
         </StackPanel>
     </Grid>
 </UserControl>

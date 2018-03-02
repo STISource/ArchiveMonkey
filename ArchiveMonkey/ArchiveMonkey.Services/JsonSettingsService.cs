@@ -2,7 +2,7 @@
 using System.Runtime.Serialization.Json;
 using ArchiveMonkey.Settings.Models;
 
-namespace ArchiveMonkey.Settings.Services
+namespace ArchiveMonkey.Services
 {
     public class JsonSettingsService : ISettingsService
     {

@@ -10,6 +10,8 @@ namespace ArchiveMonkey.Settings.Models
         private ArchivingActionType actionType;
         private Guid inputArchiveId;
         private Guid outputArchiveId;
+        private Archive inputArchive;
+        private Archive outputArchive;
 
         public ArchivingAction()
         {
@@ -84,6 +86,42 @@ namespace ArchiveMonkey.Settings.Models
                 {
                     this.outputArchiveId = value;
                     this.RaisePropertyChanged("OutputArchiveId");
+                }
+            }
+        }       
+
+        public Archive InputArchive
+        {
+            get
+            {
+                return this.inputArchive;
+            }
+
+            set
+            {
+                if (this.inputArchive != value)
+                {
+                    this.inputArchive = value;
+                    this.RaisePropertyChanged("InputArchive");
+                    this.inputArchiveId = value != null ? value.ArchiveId : Guid.Empty;
+                }
+            }
+        }
+
+        public Archive OutputArchive
+        {
+            get
+            {
+                return this.outputArchive;
+            }
+
+            set
+            {
+                if (this.outputArchive != value)
+                {
+                    this.outputArchive = value;
+                    this.RaisePropertyChanged("OutputArchiveName");
+                    this.outputArchiveId = value != null ? value.ArchiveId : Guid.Empty;
                 }
             }
         }

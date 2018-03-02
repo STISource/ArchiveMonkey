@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace ArchiveMonkey.Settings.Models
@@ -49,6 +49,15 @@ namespace ArchiveMonkey.Settings.Models
                     this.archivingActions = value;
                     this.RaisePropertyChanged("ArchivingActions");
                 }
+            }
+        }
+
+        public void ResolveDependencies()
+        {
+            foreach (var action in this.ArchivingActions)
+            {
+                action.InputArchive = this.Archives.Single(x => x.ArchiveId == action.InputArchiveId);
+                action.OutputArchive = this.Archives.Single(x => x.ArchiveId == action.OutputArchiveId);
             }
         }
     }    

@@ -1,6 +1,6 @@
 ﻿using ArchiveMonkey.Settings.Models;
 
-namespace ArchiveMonkey.Settings.Services
+namespace ArchiveMonkey.Services
 {
     public interface ISettingsService
     {
