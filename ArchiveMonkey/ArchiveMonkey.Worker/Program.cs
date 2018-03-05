@@ -18,12 +18,16 @@ namespace ArchiveMonkey.Worker
             var settings = settingsService.GetSettings();
             settings.ResolveDependencies();
 
-            iocContainer.RegisterInstance<ArchiveMonkeySettings>(settings);
+            iocContainer.RegisterInstance(settings);
             iocContainer.RegisterInstance(new Queue<ArchivingAction>());
-            iocContainer.RegisterType<IArchiveListener, DavidArchiveListener>();
+            iocContainer.RegisterType<IArchiveWatcher, DavidArchiveWatcher>();
             iocContainer.RegisterInstance(iocContainer);
-            iocContainer.RegisterType<Worker>();           
+            iocContainer.RegisterInstance<IArchiver>(new DavidArchiver());
+            iocContainer.RegisterType<Worker>();
 
+            var worker = iocContainer.Resolve<Worker>();
+
+            worker.Run();
 
             // just ensure the program keeps running
             while(true)
