@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System;
+using System.Collections.Generic;
 using ArchiveMonkey.Services;
-using ArchiveMonkey.Settings.Models;
 using Unity;
 
 namespace ArchiveMonkey.Worker
@@ -21,8 +20,9 @@ namespace ArchiveMonkey.Worker
             iocContainer.RegisterInstance(settings);
             iocContainer.RegisterInstance(new Queue<ArchivingAction>());
             iocContainer.RegisterType<IArchiveWatcher, DavidArchiveWatcher>();
+            iocContainer.RegisterType<IArchivingHistoryService, NoSqlHistoryService>();
             iocContainer.RegisterInstance(iocContainer);
-            iocContainer.RegisterInstance<IArchiver>(new DavidArchiver());
+            iocContainer.RegisterInstance<IArchiver>(new DavidArchiver(iocContainer.Resolve<IArchivingHistoryService>()));
             iocContainer.RegisterType<Worker>();
 
             var worker = iocContainer.Resolve<Worker>();
@@ -32,7 +32,10 @@ namespace ArchiveMonkey.Worker
             // just ensure the program keeps running
             while(true)
             {
-                Thread.Sleep(1000);
+                if(Console.ReadLine() == "exit")
+                {
+                    break;
+                }
             }
         }
     }

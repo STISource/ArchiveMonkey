@@ -43,7 +43,7 @@
   <ItemGroup>
     <Compile Include="Archive.cs" />
     <Compile Include="ArchiveMonkeySettings.cs" />
-    <Compile Include="ArchivingAction.cs" />
+    <Compile Include="ArchivingActionTemplate.cs" />
     <Compile Include="BasePropertyChanged.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace ArchiveMonkey.Settings.Models
 {
     [DataContract]
-    public partial class ArchivingAction : BasePropertyChanged
+    public partial class ArchivingActionTemplate : BasePropertyChanged
     {
         private Guid actionId;
         private ArchivingActionType actionType;
@@ -13,7 +13,7 @@ namespace ArchiveMonkey.Settings.Models
         private Archive inputArchive;
         private Archive outputArchive;
 
-        public ArchivingAction()
+        public ArchivingActionTemplate()
         {
             this.ActionId = Guid.NewGuid();
         }

@@ -8,12 +8,12 @@ namespace ArchiveMonkey.Settings.Models
     public partial class ArchiveMonkeySettings : BasePropertyChanged
     {
         private ObservableCollection<Archive> archives;
-        private ObservableCollection<ArchivingAction> archivingActions;
+        private ObservableCollection<ArchivingActionTemplate> archivingActions;
 
         public ArchiveMonkeySettings()
         {
             this.Archives = new ObservableCollection<Archive>();
-            this.ArchivingActions = new ObservableCollection<ArchivingAction>();
+            this.ArchivingActionTemplates = new ObservableCollection<ArchivingActionTemplate>();
         }
 
         [DataMember]
@@ -35,7 +35,7 @@ namespace ArchiveMonkey.Settings.Models
         }
 
         [DataMember]
-        public ObservableCollection<ArchivingAction> ArchivingActions
+        public ObservableCollection<ArchivingActionTemplate> ArchivingActionTemplates
         {
             get
             {
@@ -47,17 +47,22 @@ namespace ArchiveMonkey.Settings.Models
                 if (this.archivingActions != value)
                 {
                     this.archivingActions = value;
-                    this.RaisePropertyChanged("ArchivingActions");
+                    this.RaisePropertyChanged("ArchivingActionTemplates");
                 }
             }
         }
 
         public void ResolveDependencies()
         {
-            foreach (var action in this.ArchivingActions)
+            if(this.ArchivingActionTemplates == null)
             {
-                action.InputArchive = this.Archives.Single(x => x.ArchiveId == action.InputArchiveId);
-                action.OutputArchive = this.Archives.Single(x => x.ArchiveId == action.OutputArchiveId);
+                return;
+            }
+
+            foreach (var action in this.ArchivingActionTemplates)
+            {
+                action.InputArchive = this.Archives.SingleOrDefault(x => x.ArchiveId == action.InputArchiveId);
+                action.OutputArchive = this.Archives.SingleOrDefault(x => x.ArchiveId == action.OutputArchiveId);
             }
         }
     }    

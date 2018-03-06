@@ -5,12 +5,24 @@ namespace ArchiveMonkey.Worker
 {
     public interface IArchiveWatcher
     {
-        ArchivingAction WatchedArchivingAction { get; }
+        ArchivingActionTemplate WatchedArchivingActionTemplate { get; }
 
-        void Watch(ArchivingAction archive);
+        void Watch(ArchivingActionTemplate archive);
 
         void Stop();
 
-        event EventHandler InputArchiveChanged;
+        event ArchiveChangedEventHandler InputArchiveChanged;
     }
+
+    public class ArchiveChangedEventArgs : EventArgs
+    {
+        public ArchivingAction ActionToPerform { get; private set; }
+
+        public ArchiveChangedEventArgs(ArchivingAction actionToPerform)
+        {
+            this.ActionToPerform = actionToPerform;
+        }
+    }
+
+    public delegate void ArchiveChangedEventHandler(object sender, ArchiveChangedEventArgs args);
 }
