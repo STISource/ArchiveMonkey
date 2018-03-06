@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ArchiveMonkey.Services;
+using Unity;
 
 namespace ArchiveMonkey.Worker
 {
@@ -10,6 +9,34 @@ namespace ArchiveMonkey.Worker
     {
         static void Main(string[] args)
         {
+            // setup IoC Container
+            var iocContainer = new UnityContainer();
+            iocContainer.RegisterType<ISettingsService, JsonSettingsService>();
+
+            var settingsService = iocContainer.Resolve<ISettingsService>();
+            var settings = settingsService.GetSettings();
+            settings.ResolveDependencies();
+
+            iocContainer.RegisterInstance(settings);
+            iocContainer.RegisterInstance(new Queue<ArchivingAction>());
+            iocContainer.RegisterType<IArchiveWatcher, DavidArchiveWatcher>();
+            iocContainer.RegisterType<IArchivingHistoryService, NoSqlHistoryService>();
+            iocContainer.RegisterInstance(iocContainer);
+            iocContainer.RegisterInstance<IArchiver>(new DavidArchiver(iocContainer.Resolve<IArchivingHistoryService>()));
+            iocContainer.RegisterType<Worker>();
+
+            var worker = iocContainer.Resolve<Worker>();
+
+            worker.Run();
+
+            // just ensure the program keeps running
+            while(true)
+            {
+                if(Console.ReadLine() == "exit")
+                {
+                    break;
+                }
+            }
         }
     }
 }

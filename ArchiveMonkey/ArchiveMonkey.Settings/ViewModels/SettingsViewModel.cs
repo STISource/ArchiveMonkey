@@ -13,7 +13,7 @@ namespace ArchiveMonkey.Settings.ViewModels
         private readonly ISettingsService settingsService;
         private ArchiveMonkeySettings settings;
         private Archive selectedArchive;
-        private ArchivingAction selectedAction;
+        private ArchivingActionTemplate selectedAction;
         public IEnumerable<ArchivingActionType> archivingActionTypes;
         private string validationErrorMessage;
         private bool validationError;
@@ -72,7 +72,7 @@ namespace ArchiveMonkey.Settings.ViewModels
             }
         }
 
-        public ArchivingAction SelectedAction
+        public ArchivingActionTemplate SelectedAction
         {
             get
             {
@@ -145,8 +145,8 @@ namespace ArchiveMonkey.Settings.ViewModels
 
         public void NewAction()
         {
-            var action = new ArchivingAction();            
-            this.Settings.ArchivingActions.Add(action);
+            var action = new ArchivingActionTemplate();            
+            this.Settings.ArchivingActionTemplates.Add(action);
             this.SelectedAction = action;
         }
 
@@ -157,7 +157,7 @@ namespace ArchiveMonkey.Settings.ViewModels
 
         public void DeleteAction()
         {   
-            this.Settings.ArchivingActions.Remove(this.SelectedAction);
+            this.Settings.ArchivingActionTemplates.Remove(this.SelectedAction);
         }
 
         public void SaveSettings()
@@ -175,7 +175,7 @@ namespace ArchiveMonkey.Settings.ViewModels
             this.ValidationError = false;
 
             // validations
-            foreach (var action in this.settings.ArchivingActions)
+            foreach (var action in this.settings.ArchivingActionTemplates)
             {
                 if (action.InputArchiveId == Guid.Empty
                     || action.OutputArchiveId == Guid.Empty

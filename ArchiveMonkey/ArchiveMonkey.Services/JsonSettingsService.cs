@@ -1,11 +1,15 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Runtime.Serialization.Json;
 using ArchiveMonkey.Settings.Models;
+using NLog;
 
 namespace ArchiveMonkey.Services
 {
     public class JsonSettingsService : ISettingsService
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         public readonly string SettingsPath = @"ArchiveMonkeySettings.json";
 
         public ArchiveMonkeySettings GetSettings()
@@ -21,9 +25,10 @@ namespace ArchiveMonkey.Services
                     {
                         settings = (ArchiveMonkeySettings)serializer.ReadObject(fileStream);
                     }
-                    catch
+                    catch(Exception ex)
                     {
                         settings = null;
+                        logger.Error(ex, "Could not deserialize settings.");
                     }
                 }
 
