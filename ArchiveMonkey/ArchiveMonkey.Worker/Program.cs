@@ -9,9 +9,28 @@ namespace ArchiveMonkey.Worker
     {
         static void Main(string[] args)
         {
+            // check command line parameters
+            if(args.Length != 1 && args.Length != 3)
+            {
+                Console.WriteLine("Invalid usage. Please use as follows:");
+                Console.WriteLine("ArchiveMonkey.Worker.exe <server> [<username> optional] [<password> optional]");
+                Console.WriteLine("Press enter to exit ...");
+                Console.ReadLine();
+
+                return;                
+            }
+
+            var login = new ArchivingLogin { Server = args[0] };
+            if(args.Length == 3)
+            {
+                login.Username = args[1];
+                login.Password = args[2];
+            }
+
             // setup IoC Container
             var iocContainer = new UnityContainer();
-            iocContainer.RegisterType<ISettingsService, JsonSettingsService>();
+            iocContainer.RegisterInstance(login);
+            iocContainer.RegisterType<ISettingsService, JsonSettingsService>();            
 
             var settingsService = iocContainer.Resolve<ISettingsService>();
             var settings = settingsService.GetSettings();

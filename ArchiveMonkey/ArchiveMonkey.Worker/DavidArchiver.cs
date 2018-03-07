@@ -8,15 +8,15 @@ namespace ArchiveMonkey.Worker
 {
     public class DavidArchiver : IArchiver
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
-
-        private readonly string davidServer = "someservername";        
+        private static Logger logger = LogManager.GetCurrentClassLogger();              
 
         private readonly IArchivingHistoryService historyService;
+        private readonly ArchivingLogin login;
 
-        public DavidArchiver(IArchivingHistoryService historyService)
+        public DavidArchiver(IArchivingHistoryService historyService, ArchivingLogin login)
         {
             this.historyService = historyService;
+            this.login = login;
         }
 
         public void Archive(ArchivingAction action)
@@ -43,9 +43,8 @@ namespace ArchiveMonkey.Worker
             }
 
             try
-            {
-                var davidApi = new DavidAPIClass();
-                var davidAccount = davidApi.GetAccount(this.davidServer);
+            {                
+                var davidAccount = this.ConnectToDavidServer();
 
                 var sourceArchive = davidAccount.GetArchive(action.SourcePath);
                 var targetArchive = davidAccount.GetArchive(action.TargetPath);
@@ -92,9 +91,8 @@ namespace ArchiveMonkey.Worker
             logger.Info("Archiving of {0} from {1} to {2}", action.Item, action.SourcePath, action.TargetPath);
 
             try
-            {
-                var davidApi = new DavidAPIClass();                               
-                var davidAccount = davidApi.GetAccount(this.davidServer);
+            {                
+                var davidAccount = this.ConnectToDavidServer();
 
                 var sourceArchive = davidAccount.GetArchive(action.SourcePath);
                 var targetArchive = davidAccount.GetArchive(action.TargetPath);
@@ -130,6 +128,24 @@ namespace ArchiveMonkey.Worker
             }
 
             logger.Info("Archiving of {0} from {1} to {2} finished.", action.Item, action.SourcePath, action.TargetPath);
+        }
+
+        private Account ConnectToDavidServer()
+        {
+            var davidApi = new DavidAPIClass();
+            Account davidAccount = null;
+
+            if(string.IsNullOrEmpty(this.login.Username)
+                || string.IsNullOrEmpty(this.login.Password))
+            {
+                davidAccount = davidApi.GetAccount(this.login.Server);
+            }
+            else
+            {
+                davidAccount = davidApi.GetAccount(this.login.Server, this.login.Username, this.login.Password);
+            }
+
+            return davidAccount;
         }
     }
 }
