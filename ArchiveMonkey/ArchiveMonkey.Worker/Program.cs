@@ -41,7 +41,7 @@ namespace ArchiveMonkey.Worker
             iocContainer.RegisterType<IArchiveWatcher, DavidArchiveWatcher>();
             iocContainer.RegisterType<IArchivingHistoryService, NoSqlHistoryService>();
             iocContainer.RegisterInstance(iocContainer);
-            iocContainer.RegisterInstance<IArchiver>(new DavidArchiver(iocContainer.Resolve<IArchivingHistoryService>()));
+            iocContainer.RegisterType<IArchiver, DavidArchiver>();
             iocContainer.RegisterType<Worker>();
 
             var worker = iocContainer.Resolve<Worker>();
