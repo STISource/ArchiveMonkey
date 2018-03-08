@@ -77,5 +77,14 @@ namespace ArchiveMonkey.Settings.Properties {
                 return ResourceManager.GetString("Settings_Validation_ActionRefersToDeletedArchive", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to If Retry count  is set then a retry delay has to be provided..
+        /// </summary>
+        internal static string Settings_Validation_RetryCountNeedsRetryDelay {
+            get {
+                return ResourceManager.GetString("Settings_Validation_RetryCountNeedsRetryDelay", resourceCulture);
+            }
+        }
     }
 }

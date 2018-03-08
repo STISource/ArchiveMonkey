@@ -11,7 +11,9 @@ namespace ArchiveMonkey.Worker
                             ActionType = template.ActionType,
                             SourcePath = template.InputArchive.Path,
                             TargetPath = template.OutputArchive.Path,
-                            Item = item
+                            Item = item,
+                            RetryCount = template.RetryCount,
+                            RetryDelay = template.RetryDelay
                         };
         }
 
@@ -22,5 +24,9 @@ namespace ArchiveMonkey.Worker
         public string Item { get; set; }
 
         public ArchivingActionType ActionType { get; set; }
+
+        public int? RetryCount { get; set; }
+
+        public int? RetryDelay { get; set; }
     }
 }

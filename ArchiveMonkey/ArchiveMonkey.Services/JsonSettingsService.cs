@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.Serialization.Json;
+using System.Text;
+using System.Xml;
 using ArchiveMonkey.Settings.Models;
 using NLog;
 
@@ -19,13 +21,16 @@ namespace ArchiveMonkey.Services
                 ArchiveMonkeySettings settings = null;
                 var serializer = new DataContractJsonSerializer(typeof(ArchiveMonkeySettings));
 
-                using (var fileStream = File.OpenRead(this.SettingsPath))
+                using (var fileStream = new FileStream(this.SettingsPath, FileMode.Open))
                 {
                     try
                     {
-                        settings = (ArchiveMonkeySettings)serializer.ReadObject(fileStream);
+                        using (var jsonReader = JsonReaderWriterFactory.CreateJsonReader(fileStream, Encoding.GetEncoding("utf-8"), XmlDictionaryReaderQuotas.Max, null))
+                        {
+                            settings = (ArchiveMonkeySettings)serializer.ReadObject(jsonReader);
+                        }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         settings = null;
                         logger.Error(ex, "Could not deserialize settings.");
@@ -42,9 +47,14 @@ namespace ArchiveMonkey.Services
         {
             var serializer = new DataContractJsonSerializer(typeof(ArchiveMonkeySettings));
 
-            using(var fileStream = File.OpenWrite(this.SettingsPath))
+            using (var fileStream = new FileStream(this.SettingsPath, FileMode.Create))
             {
-                serializer.WriteObject(fileStream, settings);
+                using (var jsonWriter = JsonReaderWriterFactory.CreateJsonWriter(fileStream, Encoding.GetEncoding("utf-8")))
+                {
+
+                    serializer.WriteObject(jsonWriter, settings);
+                    jsonWriter.Flush();
+                }
             }
         }
     }

@@ -48,9 +48,10 @@ namespace ArchiveMonkey.Worker
                     watcher.Watch(action);
                     this.archiveWatchers.Add(watcher);
                 }
-                catch(ArgumentException)
+                catch(ArgumentException ex)
                 {                    
-                    watcher.InputArchiveChanged -= WatcherInputArchiveChanged;                    
+                    watcher.InputArchiveChanged -= WatcherInputArchiveChanged;
+                    logger.Error(ex, "Could not start watcher. " + ex.Message);
                 }
             }            
 

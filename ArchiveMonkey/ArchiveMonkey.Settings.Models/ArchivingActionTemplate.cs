@@ -6,12 +6,16 @@ namespace ArchiveMonkey.Settings.Models
     [DataContract]
     public partial class ArchivingActionTemplate : BasePropertyChanged
     {
+        private const int DefaultRetryDelay = 20;
+
         private Guid actionId;
         private ArchivingActionType actionType;
         private Guid inputArchiveId;
         private Guid outputArchiveId;
         private Archive inputArchive;
         private Archive outputArchive;
+        private int? retryCount;
+        private int? retryDelay;
 
         public ArchivingActionTemplate()
         {
@@ -122,6 +126,51 @@ namespace ArchiveMonkey.Settings.Models
                     this.outputArchive = value;
                     this.RaisePropertyChanged("OutputArchiveName");
                     this.outputArchiveId = value != null ? value.ArchiveId : Guid.Empty;
+                }
+            }
+        }
+
+        [DataMember]
+        public int? RetryCount
+        {
+            get
+            {
+                return this.retryCount;
+            }
+
+            set
+            {
+                if(this.retryCount != value)
+                {
+                    if (!this.retryCount.HasValue && value.HasValue)
+                    {
+                        this.RetryDelay = DefaultRetryDelay;
+                    }
+                    else if (this.retryCount.HasValue && !value.HasValue)
+                    {
+                        this.RetryDelay = null;
+                    }
+
+                    this.retryCount = value;
+                    this.RaisePropertyChanged("RetryCount");
+                }
+            }
+        }
+
+        [DataMember]
+        public int? RetryDelay
+        {
+            get
+            {
+                return this.retryDelay;
+            }
+
+            set
+            {
+                if (this.retryDelay != value)
+                {
+                    this.retryDelay = value;
+                    this.RaisePropertyChanged("RetryDelay");
                 }
             }
         }

@@ -123,4 +123,7 @@
   <data name="Settings_Validation_ActionRefersToDeletedArchive" xml:space="preserve">
     <value>One or more actions refer to an archive that does not exist.</value>
   </data>
+  <data name="Settings_Validation_RetryCountNeedsRetryDelay" xml:space="preserve">
+    <value>If Retry count  is set then a retry delay has to be provided.</value>
+  </data>
 </root>

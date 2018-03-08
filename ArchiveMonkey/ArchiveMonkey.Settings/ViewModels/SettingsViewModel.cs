@@ -194,6 +194,12 @@ namespace ArchiveMonkey.Settings.ViewModels
                     this.ValidationErrorMessage = Resources.Settings_Validation_ActionRefersToDeletedArchive;
                     break;
                 }
+
+                this.ValidationError = (action.RetryCount.HasValue && action.RetryCount.Value > 0) && !action.RetryDelay.HasValue;
+                if(this.ValidationError)
+                {
+                    this.validationErrorMessage = Resources.Settings_Validation_RetryCountNeedsRetryDelay;
+                }
             }            
         }        
     }

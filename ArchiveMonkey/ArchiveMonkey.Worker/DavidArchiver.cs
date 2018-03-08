@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using ArchiveMonkey.Services;
 using DvApi32;
 using NLog;
@@ -90,41 +92,71 @@ namespace ArchiveMonkey.Worker
         {
             logger.Info("Archiving of {0} from {1} to {2}", action.Item, action.SourcePath, action.TargetPath);
 
-            try
-            {                
-                var davidAccount = this.ConnectToDavidServer();
+            int numberOfRetries = action.RetryCount.HasValue && action.RetryCount.Value > 0 ? action.RetryCount.Value : 0;
+            int delay = action.RetryDelay ?? 20;
 
-                var sourceArchive = davidAccount.GetArchive(action.SourcePath);
-                var targetArchive = davidAccount.GetArchive(action.TargetPath);
-
-                for (int i = 0; i < sourceArchive.MailItems.Count; i++)
+            for (int tryCount = 0; tryCount <= numberOfRetries; tryCount++)
+            {
+                logger.Debug("{0}. try ...", tryCount + 1);
+                bool retryNeeded = true;
+                try
                 {
-                    var mail = (MailItem2)sourceArchive.MailItems.Item(i);
-                    if (mail.TextSource.ToLower() == action.Item.ToLower()
-                        && mail.IsExternal == true)
-                    {
-                        mail.Copy(targetArchive);
+                    var davidAccount = this.ConnectToDavidServer();
+                    logger.Debug("Connected to David server {0}.", this.login.Server);
 
-                        // add history entry
-                        this.historyService.AddToHistory(new HistoryEntry
-                                                            {
-                                                                ArchivingDate = DateTime.Now,
-                                                                SourcePath = action.SourcePath,
-                                                                TargetPath = action.TargetPath,
-                                                                ArchivedItem = action.Item.ToLower(),
-                                                                AdditionalInfo1 = mail.From.EMail,
-                                                                AdditionalInfo2 = mail.Destination,
-                                                                AdditionalInfo3 = mail.Subject
-                        });
-                        break;
+                    var sourceArchive = davidAccount.GetArchive(action.SourcePath);
+                    var targetArchive = davidAccount.GetArchive(action.TargetPath);
+
+                    logger.Debug("Found {0} mail items in source archive.", sourceArchive.MailItems.Count);
+
+                    for (int i = 0; i < sourceArchive.MailItems.Count; i++)
+                    {
+                        var mail = (MailItem2)sourceArchive.MailItems.Item(i);
+                        logger.Debug("Testing item {0}: {1}, Mail date: {2}, External: {3}", i, mail.TextSource.ToLower(), mail.StatusTime, mail.IsExternal);
+
+                        if (mail.TextSource.ToLower() == action.Item.ToLower())
+                        {
+                            retryNeeded = false;
+                            logger.Debug("Found right mail.");
+
+                            if (mail.IsExternal)
+                            {
+                                logger.Debug("Found right mail. Copying ...");
+                                mail.Copy(targetArchive);
+                                retryNeeded = false;
+
+                                // add history entry
+                                this.historyService.AddToHistory(new HistoryEntry
+                                {
+                                    ArchivingDate = DateTime.Now,
+                                    SourcePath = action.SourcePath,
+                                    TargetPath = action.TargetPath,
+                                    ArchivedItem = action.Item.ToLower(),
+                                    AdditionalInfo1 = mail.From.EMail,
+                                    AdditionalInfo2 = mail.Destination,
+                                    AdditionalInfo3 = mail.Subject
+                                });
+
+                                break;
+                            }
+                        }
                     }
+
+                    davidAccount.Logoff();
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex, "Error during archiving of mail item.");
                 }
 
-                davidAccount.Logoff();
-            }
-            catch(Exception ex)
-            {
-                logger.Error(ex, "Error during archiving of mail item.");
+                if(retryNeeded && tryCount < numberOfRetries)
+                {
+                    Thread.Sleep(delay * 1000);
+                }
+                else
+                {
+                    break;
+                }
             }
 
             logger.Info("Archiving of {0} from {1} to {2} finished.", action.Item, action.SourcePath, action.TargetPath);

@@ -97,9 +97,6 @@
   <ItemGroup>
     <None Include="App.config" />
     <Compile Include="IArchiver.cs" />
-    <None Include="ArchiveMonkeySettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

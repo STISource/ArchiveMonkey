@@ -25,6 +25,7 @@ namespace ArchiveMonkey.Worker
             this.watcher = new FileSystemWatcher();
             if(!Directory.Exists(actionTempalte.InputArchive.Path))
             {
+                logger.Debug("Path does not exist: {0}", actionTempalte.InputArchive.Path);
                 throw new ArgumentException("Invalid input path");
             }
             this.watcher.Path = actionTempalte.InputArchive.Path;
@@ -35,7 +36,8 @@ namespace ArchiveMonkey.Worker
 
             // Add event handlers.
             this.watcher.Changed += WatchedFolderChanged;
-            this.watcher.Created += WatchedFolderChanged;                  
+            this.watcher.Created += WatchedFolderChanged;    
+            this.watcher.Renamed += WatchedFolderChanged;
 
             this.watcher.EnableRaisingEvents = true;
 
@@ -47,7 +49,7 @@ namespace ArchiveMonkey.Worker
             this.watcher.EnableRaisingEvents = false;
             this.watcher.Changed -= WatchedFolderChanged;
             this.watcher.Created -= WatchedFolderChanged;
-            this.watcher.Deleted -= WatchedFolderChanged;            
+            this.watcher.Renamed -= WatchedFolderChanged;
             this.watcher.Dispose();
 
             logger.Info("Watching {0} stopped.", this.WatchedArchivingActionTemplate.InputArchive.Path);
@@ -62,18 +64,18 @@ namespace ArchiveMonkey.Worker
                 switch (e.ChangeType) 
                 {
                     case WatcherChangeTypes.Created:
-                        this.filesAwaitingChangedNotification.Add(e.FullPath);
-                        this.RaiseInputArchiveChanged(
-                            ArchivingAction.FromTemplate(
-                                this.WatchedArchivingActionTemplate,
-                                e.FullPath));
-                        logger.Debug("ArchiveChanged raised for {0}.", e.FullPath);
+                        this.filesAwaitingChangedNotification.Add(e.FullPath);                                                
                         break;
 
                     case WatcherChangeTypes.Changed:
                         if(this.filesAwaitingChangedNotification.Contains(e.FullPath))
-                        {
-                            this.filesAwaitingChangedNotification.Remove(e.FullPath);                                                        
+                        {                            
+                            this.filesAwaitingChangedNotification.Remove(e.FullPath);
+                            logger.Debug("Raise Archive changed for {0}.", e.FullPath);
+                            this.RaiseInputArchiveChanged(
+                                ArchivingAction.FromTemplate(
+                                    this.WatchedArchivingActionTemplate,
+                                    e.FullPath));                            
                         }
                         
                         break;
