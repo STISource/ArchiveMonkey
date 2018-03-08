@@ -135,10 +135,10 @@ namespace ArchiveMonkey.Worker
                                     AdditionalInfo1 = mail.From.EMail,
                                     AdditionalInfo2 = mail.Destination,
                                     AdditionalInfo3 = mail.Subject
-                                });
-
-                                break;
+                                });                                
                             }
+
+                            break;
                         }
                     }
 
