@@ -55,12 +55,23 @@ namespace ArchiveMonkey.Worker
 
                 for (int i = 0; i < sourceArchive.MailItems.Count; i++)
                 {
-                    var mail = (MailItem2)sourceArchive.MailItems.Item(i);
+                    var item = sourceArchive.MailItems.Item(i);
+                    if(!(item is MailItem))
+                    {
+                        logger.Warn("Item is not a mail item. Subject: {0}", item.Subject);
+                        continue;
+                    }
+
+                    var mail = (MailItem)item;
                     var mailSendRecievedDate = (DateTime)mail.StatusTime;
+
+                    logger.Debug("Testing item {0}: {1}, Mail date: {2}, External: {2}", i, mail.TextSource.ToLower(), mail.StatusTime, mail.IsExternal);
+
                     if (mail.IsExternal == true
                         && mailSendRecievedDate > considerMailsFrom
                         && !historyEntries.Any(x => x.ArchivedItem == mail.TextSource.ToLower()))
                     {
+                        logger.Debug("Found external mail that has not yet been archived. From {0} To {1} at {2}", mail.From.EMail, mail.Destination, mail.StatusTime);
                         logger.Info("Copying mail {0} from {1} to {2}", mail.TextSource, action.SourcePath, action.TargetPath);
                         mail.Copy(targetArchive);
 
@@ -82,7 +93,7 @@ namespace ArchiveMonkey.Worker
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "Error during archiving of latest changes.");
+                logger.Error(ex, "{0}\n{1}\n{2}", "Error during archiving of latest changes.", ex.Message, ex.StackTrace);
             }
 
             logger.Info("Archiving latest changes from {0} to {1} finished.", action.SourcePath, action.TargetPath);
@@ -111,17 +122,24 @@ namespace ArchiveMonkey.Worker
 
                     for (int i = 0; i < sourceArchive.MailItems.Count; i++)
                     {
-                        var mail = (MailItem2)sourceArchive.MailItems.Item(i);
+                        var item = sourceArchive.MailItems.Item(i);
+                        if (!(item is MailItem))
+                        {
+                            logger.Warn("Item is not a mail item. Subject: {0}", item.Subject);
+                            continue;
+                        }
+
+                        var mail = (MailItem)item;
                         logger.Debug("Testing item {0}: {1}, Mail date: {2}, External: {3}", i, mail.TextSource.ToLower(), mail.StatusTime, mail.IsExternal);
 
                         if (mail.TextSource.ToLower() == action.Item.ToLower())
                         {
                             retryNeeded = false;
-                            logger.Debug("Found right mail.");
+                            logger.Debug("Found right mail. From {0} To {1} at {2}", mail.From.EMail, mail.Destination, mail.StatusTime);
 
                             if (mail.IsExternal)
                             {
-                                logger.Debug("Found right mail. Copying ...");
+                                logger.Debug("Copying ...");
                                 mail.Copy(targetArchive);
                                 retryNeeded = false;
 
@@ -137,6 +155,10 @@ namespace ArchiveMonkey.Worker
                                     AdditionalInfo3 = mail.Subject
                                 });                                
                             }
+                            else
+                            {
+                                logger.Debug("Internal mail");
+                            }
 
                             break;
                         }
@@ -146,7 +168,7 @@ namespace ArchiveMonkey.Worker
                 }
                 catch (Exception ex)
                 {
-                    logger.Error(ex, "Error during archiving of mail item.");
+                    logger.Error(ex, "{0}\n{1}\n{2}", "Error during archiving of mail item.", ex.Message, ex.StackTrace);
                 }
 
                 if(retryNeeded && tryCount < numberOfRetries)
