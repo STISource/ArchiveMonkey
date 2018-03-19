@@ -6,7 +6,8 @@ namespace ArchiveMonkey.Settings.Models
     [DataContract]
     public partial class ArchivingActionTemplate : BasePropertyChanged
     {
-        private const int DefaultRetryDelay = 20;
+        private const int DefaultRetryDelay = 30;
+        private const int DefaultRetryCount = 5;
 
         private Guid actionId;
         private ArchivingActionType actionType;
@@ -20,6 +21,9 @@ namespace ArchiveMonkey.Settings.Models
         public ArchivingActionTemplate()
         {
             this.ActionId = Guid.NewGuid();
+            this.ActionType = ArchivingActionType.Copy;
+            this.RetryCount = DefaultRetryCount;
+            this.RetryDelay = DefaultRetryDelay;
         }
 
         [DataMember(IsRequired = true)]
@@ -178,7 +182,6 @@ namespace ArchiveMonkey.Settings.Models
 
     public enum ArchivingActionType
     {
-        Copy = 1,
-        Move = 2
+        Copy = 1        
     }
 }

@@ -10,7 +10,9 @@ namespace ArchiveMonkey.Worker
                         {
                             ActionType = template.ActionType,
                             SourcePath = template.InputArchive.Path,
+                            SourceArchiveName = template.InputArchive.DisplayName,
                             TargetPath = template.OutputArchive.Path,
+                            TargetArchiveName = template.OutputArchive.DisplayName,
                             Item = item,
                             RetryCount = template.RetryCount,
                             RetryDelay = template.RetryDelay
@@ -19,7 +21,11 @@ namespace ArchiveMonkey.Worker
 
         public string SourcePath { get; set; }
 
+        public string SourceArchiveName { get; set; }
+
         public string TargetPath { get; set; }
+
+        public string TargetArchiveName { get; set; }
 
         public string Item { get; set; }
 

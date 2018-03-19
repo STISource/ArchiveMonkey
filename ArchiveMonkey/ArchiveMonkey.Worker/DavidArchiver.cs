@@ -34,13 +34,13 @@ namespace ArchiveMonkey.Worker
         
         private void ArchiveLatestChanges(ArchivingAction action)
         {
-            logger.Info("Archiving latest changes from {0} to {1}", action.SourcePath, action.TargetPath);
+            logger.Info("Archiving latest changes from {0} - {1} to {2} - {3}", action.SourceArchiveName, action.SourcePath, action.TargetArchiveName, action.TargetPath);
 
             var historyEntries = this.historyService.ReadHistory(action.SourcePath);            
 
             if(!historyEntries.Any())
             {
-                logger.Warn("No history entries found for {0}", action.SourcePath);
+                logger.Warn("No history entries found for {0}", action.SourceArchiveName);
                 return;
             }
 
@@ -72,7 +72,7 @@ namespace ArchiveMonkey.Worker
                         && !historyEntries.Any(x => x.ArchivedItem == mail.TextSource.ToLower()))
                     {
                         logger.Debug("Found external mail that has not yet been archived. From {0} To {1} at {2}", mail.From.EMail, mail.Destination, mail.StatusTime);
-                        logger.Info("Copying mail {0} from {1} to {2}", mail.TextSource, action.SourcePath, action.TargetPath);
+                        logger.Info("Copying mail {0} from {1} to {2}", mail.TextSource, action.SourceArchiveName, action.TargetArchiveName);
                         mail.Copy(targetArchive);
 
                         // add history entry
@@ -96,12 +96,12 @@ namespace ArchiveMonkey.Worker
                 logger.Error(ex, "{0}\n{1}\n{2}", "Error during archiving of latest changes.", ex.Message, ex.StackTrace);
             }
 
-            logger.Info("Archiving latest changes from {0} to {1} finished.", action.SourcePath, action.TargetPath);
+            logger.Info("Archiving latest changes from {0} to {1} finished.", action.SourceArchiveName, action.TargetArchiveName);
         }
 
         private void ArchiveItem(ArchivingAction action)
         {
-            logger.Info("Archiving of {0} from {1} to {2}", action.Item, action.SourcePath, action.TargetPath);
+            logger.Info("Archiving of {0} from {1} - {2} to {3} - {4}", action.Item, action.SourceArchiveName, action.SourcePath, action.TargetArchiveName, action.TargetPath);
 
             int numberOfRetries = action.RetryCount.HasValue && action.RetryCount.Value > 0 ? action.RetryCount.Value : 0;
             int delay = action.RetryDelay ?? 20;
@@ -135,13 +135,13 @@ namespace ArchiveMonkey.Worker
                         if (mail.TextSource.ToLower() == action.Item.ToLower())
                         {
                             retryNeeded = false;
-                            logger.Debug("Found right mail. From {0} To {1} at {2}", mail.From.EMail, mail.Destination, mail.StatusTime);
+                            logger.Info("Found right mail. From {0} To {1} at {2}", mail.From.EMail, mail.Destination, mail.StatusTime);
 
                             if (mail.IsExternal)
                             {
                                 logger.Debug("Copying ...");
                                 mail.Copy(targetArchive);
-                                retryNeeded = false;
+                                retryNeeded = false;                                
 
                                 // add history entry
                                 this.historyService.AddToHistory(new HistoryEntry
@@ -157,7 +157,7 @@ namespace ArchiveMonkey.Worker
                             }
                             else
                             {
-                                logger.Debug("Internal mail");
+                                logger.Info("Internal mail. No action taken.");
                             }
 
                             break;
@@ -181,7 +181,7 @@ namespace ArchiveMonkey.Worker
                 }
             }
 
-            logger.Info("Archiving of {0} from {1} to {2} finished.", action.Item, action.SourcePath, action.TargetPath);
+            logger.Info("Archiving of {0} from {1} to {2} finished.", action.Item, action.SourceArchiveName, action.TargetArchiveName);
         }
 
         private Account ConnectToDavidServer()

@@ -96,8 +96,7 @@ namespace ArchiveMonkey.Settings.ViewModels
             {
                 return this.archivingActionTypes = this.archivingActionTypes ?? new List<ArchivingActionType>(new ArchivingActionType[]
                                                                                     {
-                                                                                        ArchivingActionType.Copy,
-                                                                                        ArchivingActionType.Move
+                                                                                        ArchivingActionType.Copy                                                                                        
                                                                                     });
             }
         }
@@ -179,7 +178,7 @@ namespace ArchiveMonkey.Settings.ViewModels
             {
                 if (action.InputArchiveId == Guid.Empty
                     || action.OutputArchiveId == Guid.Empty
-                    || (action.ActionType != ArchivingActionType.Copy && action.ActionType != ArchivingActionType.Move))
+                    || action.ActionType != ArchivingActionType.Copy)
                 {
                     this.ValidationError = true;
                     this.ValidationErrorMessage = Resources.Settings_Validation_ActionDefinitionIncomplete;
