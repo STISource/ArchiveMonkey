@@ -158,9 +158,7 @@ namespace ArchiveMonkey.Worker
                             else
                             {
                                 logger.Info("Internal mail. No action taken.");
-                            }
-
-                            break;
+                            }                            
                         }
                     }
 
