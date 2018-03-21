@@ -1,12 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading;
 using ArchiveMonkey.Services;
+using NLog;
 using Unity;
 
 namespace ArchiveMonkey.Worker
 {
     class Program
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
+        public const string StopFile = @"stop";
+
         static void Main(string[] args)
         {
             // check command line parameters
@@ -18,6 +25,11 @@ namespace ArchiveMonkey.Worker
                 Console.ReadLine();
 
                 return;                
+            }
+
+            if(File.Exists(StopFile))
+            {
+                File.Delete(StopFile);
             }
 
             var login = new ArchivingLogin { Server = args[0] };
@@ -36,8 +48,9 @@ namespace ArchiveMonkey.Worker
             var settings = settingsService.GetSettings();
             settings.ResolveDependencies();
 
+            var queue = new Queue<ArchivingAction>();
+            iocContainer.RegisterInstance(queue);
             iocContainer.RegisterInstance(settings);
-            iocContainer.RegisterInstance(new Queue<ArchivingAction>());
             iocContainer.RegisterType<IArchiveWatcher, DavidArchiveWatcher>();
             iocContainer.RegisterType<IArchivingHistoryService, NoSqlHistoryService>();
             iocContainer.RegisterInstance(iocContainer);
@@ -51,10 +64,21 @@ namespace ArchiveMonkey.Worker
             // just ensure the program keeps running
             while(true)
             {
-                if(Console.ReadLine() == "exit")
+
+                if(File.Exists(StopFile))
                 {
-                    break;
+                    logger.Info("Found stop file {0} ...", StopFile);
+
+                    logger.Info("Worker queue contains {0} elements.", queue.Count);
+                    if(queue.Count == 0)
+                    {
+                        logger.Info("Stopping program...");
+                        break;
+                    }
+                    
                 }
+
+                Thread.Sleep(500);
             }
         }
     }
