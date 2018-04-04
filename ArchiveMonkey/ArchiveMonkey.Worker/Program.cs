@@ -64,7 +64,6 @@ namespace ArchiveMonkey.Worker
             // just ensure the program keeps running
             while(true)
             {
-
                 if(File.Exists(StopFile))
                 {
                     logger.Info("Found stop file {0} ...", StopFile);
