@@ -15,6 +15,7 @@ namespace ArchiveMonkey.Settings
         {
             var container = new UnityContainer();
             container.RegisterType<ISettingsService, JsonSettingsService>();
+            container.RegisterType<IFilterService, DavidFilterService>();
             container.RegisterType<SettingsViewModel>();
             container.RegisterType<SettingsView>();
 

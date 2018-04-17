@@ -11,6 +11,7 @@ namespace ArchiveMonkey.Settings.ViewModels
     public class SettingsViewModel : BasePropertyChanged
     {
         private readonly ISettingsService settingsService;
+        private readonly IFilterService filterService;
         private ArchiveMonkeySettings settings;
         private Archive selectedArchive;
         private ArchivingActionTemplate selectedAction;
@@ -18,9 +19,10 @@ namespace ArchiveMonkey.Settings.ViewModels
         private string validationErrorMessage;
         private bool validationError;
 
-        public SettingsViewModel(ISettingsService settingsService)
+        public SettingsViewModel(ISettingsService settingsService, IFilterService filterService)
         {
             this.settingsService = settingsService;
+            this.filterService = filterService;
             this.Settings = settingsService.GetSettings();
             this.Settings.ResolveDependencies();
 
@@ -197,7 +199,15 @@ namespace ArchiveMonkey.Settings.ViewModels
                 this.ValidationError = (action.RetryCount.HasValue && action.RetryCount.Value > 0) && !action.RetryDelay.HasValue;
                 if(this.ValidationError)
                 {
-                    this.validationErrorMessage = Resources.Settings_Validation_RetryCountNeedsRetryDelay;
+                    this.ValidationErrorMessage = Resources.Settings_Validation_RetryCountNeedsRetryDelay;
+                    break;
+                }
+
+                this.ValidationError = !string.IsNullOrWhiteSpace(action.Filter) && !this.filterService.IsValidFilter(action.Filter);
+
+                if(this.validationError)
+                {
+                    this.ValidationErrorMessage = Resources.Settings_Validation_FilterInvalid;
                 }
             }            
         }        
