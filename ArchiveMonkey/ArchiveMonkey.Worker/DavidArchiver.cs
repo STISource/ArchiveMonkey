@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -136,6 +137,21 @@ namespace ArchiveMonkey.Worker
                         {
                             retryNeeded = false;
                             logger.Info("Found right mail. From {0} To {1} at {2}", mail.From.EMail, mail.Destination, mail.StatusTime);
+
+                            try
+                            {
+                                var recipients = new List<string>();
+                                for (int recipientIndex = 0; recipientIndex < mail.Recipients.Count; recipientIndex++)
+                                {
+                                    recipients.Add(mail.Recipients.Item(recipientIndex).EMail);
+                                }
+
+                                logger.Debug("Recipient list contains {0} elements, which are {1}", recipients.Count, string.Join("; ", recipients));
+                            }
+                            catch(Exception ex)
+                            {
+                                logger.Warn("Could not determine recipients list for logging purposes ...");
+                            }
 
                             if (mail.IsExternal)
                             {
