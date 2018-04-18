@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using ArchiveMonkey.Services;
 using ArchiveMonkey.Settings.Models;
 using NLog;
 
@@ -11,12 +12,20 @@ namespace ArchiveMonkey.Worker
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
         private const string mailExtension = ".001";
+
+        private readonly IFilterService filterService;
+
         private FileSystemWatcher watcher;
         private IList<string> filesAwaitingChangedNotification = new List<string>();        
 
         public ArchivingActionTemplate WatchedArchivingActionTemplate { get; private set; }
 
         public event ArchiveChangedEventHandler InputArchiveChanged;
+
+        public DavidArchiveWatcher(IFilterService filterService)
+        {
+            this.filterService = filterService;
+        }
 
         public void Watch(ArchivingActionTemplate actionTempalte)
         {
@@ -75,6 +84,7 @@ namespace ArchiveMonkey.Worker
                             this.RaiseInputArchiveChanged(
                                 ArchivingAction.FromTemplate(
                                     this.WatchedArchivingActionTemplate,
+                                    this.filterService,
                                     e.FullPath));                            
                         }
                         

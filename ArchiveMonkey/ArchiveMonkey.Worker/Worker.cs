@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using ArchiveMonkey.Services;
 using ArchiveMonkey.Settings.Models;
 using NLog;
 using Unity;
@@ -16,6 +17,7 @@ namespace ArchiveMonkey.Worker
         private readonly UnityContainer iocContainer;
         private readonly ICollection<IArchiveWatcher> archiveWatchers;
         private readonly IArchiver archiver;
+        private readonly IFilterService filterService;
 
         private bool processing = false;
 
@@ -26,11 +28,12 @@ namespace ArchiveMonkey.Worker
             this.iocContainer = iocContainer;
             this.archiveWatchers = new List<IArchiveWatcher>();
             this.archiver = archiver;
+            this.filterService = iocContainer.Resolve<IFilterService>();
 
             foreach (var action in this.settings.ArchivingActionTemplates)
             {
                 // create one queue entry for every archiving action to ensure changes are processed that might have been missed since last program run
-                this.queue.Enqueue(ArchivingAction.FromTemplate(action));
+                this.queue.Enqueue(ArchivingAction.FromTemplate(action, this.filterService));
             }
         }        
 

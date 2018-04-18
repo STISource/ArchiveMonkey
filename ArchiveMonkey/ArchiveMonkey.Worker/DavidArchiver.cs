@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using ArchiveMonkey.Services;
 using DvApi32;
 using NLog;
@@ -73,6 +71,27 @@ namespace ArchiveMonkey.Worker
                         && !historyEntries.Any(x => x.ArchivedItem == mail.TextSource.ToLower()))
                     {
                         logger.Debug("Found external mail that has not yet been archived. From {0} To {1} at {2}", mail.From.EMail, mail.Destination, mail.StatusTime);
+
+                        if (action.Filter != null)
+                        {
+                            try
+                            {
+                                logger.Info("Applying filter {0}", action.Filter.ToString());
+                                if (!action.Filter.FilterApplies(mail))
+                                {
+                                    logger.Info("Filter does not match.");
+                                    continue;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                logger.Error("Could not evaluate filter. Exception: {0}", ex.Message);
+                                continue;
+                            }
+
+                            logger.Info("Filter matches.");
+                        }
+                        
                         logger.Info("Copying mail {0} from {1} to {2}", mail.TextSource, action.SourceArchiveName, action.TargetArchiveName);
                         mail.Copy(targetArchive);
 
@@ -133,49 +152,60 @@ namespace ArchiveMonkey.Worker
                         var mail = (MailItem)item;
                         logger.Debug("Testing item {0}: {1}, Mail date: {2}, External: {3}", i, mail.TextSource.ToLower(), mail.StatusTime, mail.IsExternal);
 
-                        if (mail.TextSource.ToLower() == action.Item.ToLower())
+                        if (mail.TextSource.ToLower() != action.Item.ToLower())
                         {
-                            retryNeeded = false;
-                            logger.Info("Found right mail. From {0} To {1} at {2}", mail.From.EMail, mail.Destination, mail.StatusTime);
+                            logger.Debug("This is not the right mail.");
+                            continue;
+                        }
 
+                        logger.Info("Found right mail. From {0} To {1} at {2}", mail.From.EMail, mail.Destination, mail.StatusTime);
+
+                        retryNeeded = false;                        
+                            
+                        if (!mail.IsExternal)
+                        {
+                            logger.Info("Internal mail. No action taken.");
+                            break;
+                        }
+
+                        if (action.Filter != null)
+                        {
                             try
                             {
-                                var recipients = new List<string>();
-                                for (int recipientIndex = 0; recipientIndex < mail.Recipients.Count; recipientIndex++)
+                                logger.Info("Applying filter {0}", action.Filter.ToString());
+                                if(!action.Filter.FilterApplies(mail))
                                 {
-                                    recipients.Add(mail.Recipients.Item(recipientIndex).EMail);
+                                    logger.Info("Filter does not match.");
+                                    break;
                                 }
-
-                                logger.Debug("Recipient list contains {0} elements, which are {1}", recipients.Count, string.Join("; ", recipients));
                             }
-                            catch(Exception ex)
+                            catch (Exception ex)
                             {
-                                logger.Warn("Could not determine recipients list for logging purposes ...");
+                                logger.Error("Could not evaluate filter. Exception: {0}", ex.Message);
+                                break;
                             }
 
-                            if (mail.IsExternal)
-                            {
-                                logger.Debug("Copying ...");
-                                mail.Copy(targetArchive);
-                                retryNeeded = false;                                
-
-                                // add history entry
-                                this.historyService.AddToHistory(new HistoryEntry
-                                {
-                                    ArchivingDate = DateTime.Now,
-                                    SourcePath = action.SourcePath,
-                                    TargetPath = action.TargetPath,
-                                    ArchivedItem = action.Item.ToLower(),
-                                    AdditionalInfo1 = mail.From.EMail,
-                                    AdditionalInfo2 = mail.Destination,
-                                    AdditionalInfo3 = mail.Subject
-                                });                                
-                            }
-                            else
-                            {
-                                logger.Info("Internal mail. No action taken.");
-                            }                            
+                            logger.Info("Filter matches.");
                         }
+
+                        logger.Debug("Copying ...");
+                        mail.Copy(targetArchive);
+                        retryNeeded = false;                                
+
+                        // add history entry
+                        this.historyService.AddToHistory(new HistoryEntry
+                        {
+                            ArchivingDate = DateTime.Now,
+                            SourcePath = action.SourcePath,
+                            TargetPath = action.TargetPath,
+                            ArchivedItem = action.Item.ToLower(),
+                            AdditionalInfo1 = mail.From.EMail,
+                            AdditionalInfo2 = mail.Destination,
+                            AdditionalInfo3 = mail.Subject
+                        });
+
+                        // if we successfully archived a email there is no further need to iterate through this archive
+                        break;
                     }
 
                     davidAccount.Logoff();

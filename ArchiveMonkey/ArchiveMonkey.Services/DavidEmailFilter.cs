@@ -21,7 +21,7 @@ namespace ArchiveMonkey.Services
 
             this.attribute = (EmailAttribute)Enum.Parse(typeof(EmailAttribute), elements[0]);
             this.comparer = (EmailAttributeComparer)Enum.Parse(typeof(EmailAttributeComparer), elements[1]);
-            this.value = elements[2];
+            this.value = elements[2].ToLower();
         }       
 
         public bool FilterApplies(object itemToArchive)
@@ -35,7 +35,12 @@ namespace ArchiveMonkey.Services
                     var recipients = new List<string>();
                     for(int i = 0; i < mailItem.Recipients.Count; i++)
                     {
-                        recipients.Add(mailItem.Recipients.Item(i).EMail);
+                        recipients.Add(mailItem.Recipients.Item(i).EMail.ToLower());
+                    }
+
+                    for (int i = 0; i < mailItem.CC.Count; i++)
+                    {
+                        recipients.Add(mailItem.CC.Item(i).EMail.ToLower());
                     }
 
                     applies = this.comparer == EmailAttributeComparer.Contains ? recipients.Contains(this.value) : !recipients.Contains(this.value);
@@ -43,6 +48,11 @@ namespace ArchiveMonkey.Services
             }
 
             return applies;
+        }
+
+        public override string ToString()
+        {
+            return string.Format("{0} {1} {2}", this.attribute.ToString(), this.comparer.ToString(), this.value);
         }
 
         public static bool IsValidFilter(string filter)
