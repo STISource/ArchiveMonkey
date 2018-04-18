@@ -75,10 +75,11 @@
                 <DataGrid.Columns>
                     <DataGridComboBoxColumn Header="From" ItemsSource="{Binding Root.DataContext.Settings.Archives, Source={StaticResource Proxy}}" SortMemberPath="InputArchive.DisplayName" SelectedItemBinding="{Binding InputArchive}" />
                     <DataGridComboBoxColumn Header="To" ItemsSource="{Binding Root.DataContext.Settings.Archives, Source={StaticResource Proxy}}" SortMemberPath="OutArchive.DisplayName" SelectedItemBinding="{Binding OutputArchive}" />
-                    <DataGridComboBoxColumn Header="Action" ItemsSource="{Binding Root.DataContext.ArchivingActionTypes, Source={StaticResource Proxy}}" SelectedItemBinding="{Binding ActionType}" />
+                    <DataGridComboBoxColumn Header="Action" ItemsSource="{Binding Root.DataContext.ArchivingActionTypes, Source={StaticResource Proxy}}" SelectedItemBinding="{Binding ActionType}" />                    
+                    <DataGridTextColumn Header="Custom Filter" Binding="{Binding Filter, Mode=TwoWay}" />
+                    <DataGridTextColumn Header="Sequence" Binding="{Binding Sequence, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource IntToStringConverter}}" />
                     <DataGridTextColumn Header="Retry count" Binding="{Binding RetryCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource IntToStringConverter}}" />
                     <DataGridTextColumn Header="Retry delay (s)" Binding="{Binding RetryDelay, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource IntToStringConverter}}" />
-                    <DataGridTextColumn Header="Custom Filter" Binding="{Binding Filter, Mode=TwoWay}" />
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

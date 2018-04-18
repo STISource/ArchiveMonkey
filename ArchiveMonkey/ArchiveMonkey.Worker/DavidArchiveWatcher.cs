@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using ArchiveMonkey.Services;
 using ArchiveMonkey.Settings.Models;
 using NLog;
@@ -18,7 +19,7 @@ namespace ArchiveMonkey.Worker
         private FileSystemWatcher watcher;
         private IList<string> filesAwaitingChangedNotification = new List<string>();        
 
-        public ArchivingActionTemplate WatchedArchivingActionTemplate { get; private set; }
+        public IEnumerable<ArchivingActionTemplate> WatchedArchivingActionTemplates { get; private set; }
 
         public event ArchiveChangedEventHandler InputArchiveChanged;
 
@@ -27,17 +28,18 @@ namespace ArchiveMonkey.Worker
             this.filterService = filterService;
         }
 
-        public void Watch(ArchivingActionTemplate actionTempalte)
+        public void Watch(IEnumerable<ArchivingActionTemplate> actionTempaltes)
         {
-            this.WatchedArchivingActionTemplate = actionTempalte;
+            this.WatchedArchivingActionTemplates = actionTempaltes.OrderBy(x => x.Sequence).ToList();
+            var sourceArchive = this.WatchedArchivingActionTemplates.First().InputArchive;
 
             this.watcher = new FileSystemWatcher();
-            if(!Directory.Exists(actionTempalte.InputArchive.Path))
+            if(!Directory.Exists(sourceArchive.Path))
             {
-                logger.Debug("Path does not exist: {0}", actionTempalte.InputArchive.Path);
+                logger.Debug("Path does not exist: {0}", sourceArchive.Path);
                 throw new ArgumentException("Invalid input path");
             }
-            this.watcher.Path = actionTempalte.InputArchive.Path;
+            this.watcher.Path = sourceArchive.Path;
             this.watcher.IncludeSubdirectories = false;
 
             this.watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName;
@@ -50,7 +52,7 @@ namespace ArchiveMonkey.Worker
 
             this.watcher.EnableRaisingEvents = true;
 
-            logger.Info("Watching {0} started.", actionTempalte.InputArchive.Path);            
+            logger.Info("Watching {0} started.", sourceArchive.Path);            
         }
 
         public void Stop()
@@ -61,7 +63,7 @@ namespace ArchiveMonkey.Worker
             this.watcher.Renamed -= WatchedFolderChanged;
             this.watcher.Dispose();
 
-            logger.Info("Watching {0} stopped.", this.WatchedArchivingActionTemplate.InputArchive.Path);
+            logger.Info("Watching {0} stopped.", this.WatchedArchivingActionTemplates.First().InputArchive.Path);
         }        
 
         private void WatchedFolderChanged(object sender, FileSystemEventArgs e)
@@ -81,11 +83,15 @@ namespace ArchiveMonkey.Worker
                         {                            
                             this.filesAwaitingChangedNotification.Remove(e.FullPath);
                             logger.Debug("Raise Archive changed for {0}.", e.FullPath);
-                            this.RaiseInputArchiveChanged(
-                                ArchivingAction.FromTemplate(
-                                    this.WatchedArchivingActionTemplate,
-                                    this.filterService,
-                                    e.FullPath));                            
+
+                            foreach (var actionTemplate in this.WatchedArchivingActionTemplates)
+                            {
+                                this.RaiseInputArchiveChanged(
+                                    ArchivingAction.FromTemplate(
+                                        actionTemplate,
+                                        this.filterService,
+                                        e.FullPath));
+                            }
                         }
                         
                         break;

@@ -18,6 +18,7 @@ namespace ArchiveMonkey.Settings.Models
         private int? retryCount;
         private int? retryDelay;
         private string filter;
+        private int sequence;
 
         public ArchivingActionTemplate()
         {
@@ -194,6 +195,25 @@ namespace ArchiveMonkey.Settings.Models
                 {
                     this.filter = value;
                     this.RaisePropertyChanged("Filter");
+                }
+            }
+        }
+
+        [DataMember]
+
+        public int Sequence
+        {
+            get
+            {
+                return this.sequence;
+            }
+
+            set
+            {
+                if(this.sequence != value)
+                {
+                    this.sequence = value;
+                    this.RaisePropertyChanged("Sequence");
                 }
             }
         }

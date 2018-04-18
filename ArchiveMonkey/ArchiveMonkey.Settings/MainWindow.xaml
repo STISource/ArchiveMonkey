@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ArchiveMonkey.Settings.Views"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="Archive Monkey Settings" Height="600" Width="800">    
+        Title="Archive Monkey Settings" Height="700" Width="1100">    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />

@@ -14,7 +14,7 @@ namespace ArchiveMonkey.Settings.Views
         public SettingsView(SettingsViewModel viewModel)
         {
             InitializeComponent();
-            this.DataContext = viewModel;
+            this.DataContext = viewModel;            
         }            
     }
 }

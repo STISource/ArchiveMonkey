@@ -67,12 +67,13 @@ namespace ArchiveMonkey.Worker
             {
                 if(File.Exists(StopFile))
                 {
-                    logger.Info("Found stop file {0} ...", StopFile);
+                    logger.Info("Found stop file {0} ... Stop watching of folders.", StopFile);
+                    worker.StopWatching();
 
-                    logger.Info("Worker queue contains {0} elements.", queue.Count);
-                    if(queue.Count == 0)
+                    logger.Info("Processing of queue still running? {0}", worker.Processing);
+                    if(!worker.Processing)
                     {
-                        logger.Info("Stopping program...");
+                        logger.Info("Processing queue finished. Stopping program...");
                         break;
                     }
                     

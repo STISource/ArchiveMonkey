@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using ArchiveMonkey.Services;
 using ArchiveMonkey.Settings.Models;
@@ -19,7 +20,7 @@ namespace ArchiveMonkey.Worker
         private readonly IArchiver archiver;
         private readonly IFilterService filterService;
 
-        private bool processing = false;
+        public bool Processing { get; private set; }
 
         public Worker(ArchiveMonkeySettings settings, Queue<ArchivingAction> queue, IArchiver archiver, UnityContainer iocContainer)
         {
@@ -29,8 +30,9 @@ namespace ArchiveMonkey.Worker
             this.archiveWatchers = new List<IArchiveWatcher>();
             this.archiver = archiver;
             this.filterService = iocContainer.Resolve<IFilterService>();
+            this.Processing = false;
 
-            foreach (var action in this.settings.ArchivingActionTemplates)
+            foreach (var action in this.settings.ArchivingActionTemplates.OrderBy(x => x.InputArchive.Path).ThenBy(y => y.Sequence))
             {
                 // create one queue entry for every archiving action to ensure changes are processed that might have been missed since last program run
                 this.queue.Enqueue(ArchivingAction.FromTemplate(action, this.filterService));
@@ -41,14 +43,15 @@ namespace ArchiveMonkey.Worker
         {
             logger.Info("Worker starting ...");
 
-            foreach(var action in this.settings.ArchivingActionTemplates)
+            foreach(var actionGroup in this.settings.ArchivingActionTemplates.GroupBy(x => x.InputArchiveId))
             {
                 IArchiveWatcher watcher = null;
                 try
                 {
+                    // add a watcher per source directory. It is possible that there are several action templates with the same source directory
                     watcher = this.iocContainer.Resolve<IArchiveWatcher>();
                     watcher.InputArchiveChanged += WatcherInputArchiveChanged;
-                    watcher.Watch(action);
+                    watcher.Watch(actionGroup);
                     this.archiveWatchers.Add(watcher);
                 }
                 catch(ArgumentException ex)
@@ -62,15 +65,24 @@ namespace ArchiveMonkey.Worker
             this.ProcessQueue();
         }
 
+        public void StopWatching()
+        {
+            foreach(var watcher in this.archiveWatchers)
+            {
+                watcher.Stop();
+                logger.Info("Watching folder {0} stopped.", watcher.WatchedArchivingActionTemplates.First().InputArchive.DisplayName);
+            }
+        }
+
         private void ProcessQueue()
         {
             // ensure processing occurs only once at a time
-            if(this.processing)
+            if(this.Processing)
             {
                 return;
             }
 
-            this.processing = true;
+            this.Processing = true;
 
             logger.Info("Processing worker queue started.");
 
@@ -94,7 +106,7 @@ namespace ArchiveMonkey.Worker
 
             logger.Info("Processing worker queue finished.");
 
-            this.processing = false;
+            this.Processing = false;
         }
 
         private void WatcherInputArchiveChanged(object sender, ArchiveChangedEventArgs e)

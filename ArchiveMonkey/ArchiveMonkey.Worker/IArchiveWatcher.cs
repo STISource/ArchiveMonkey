@@ -1,13 +1,14 @@
 ﻿using ArchiveMonkey.Settings.Models;
 using System;
+using System.Collections.Generic;
 
 namespace ArchiveMonkey.Worker
 {
     public interface IArchiveWatcher
     {
-        ArchivingActionTemplate WatchedArchivingActionTemplate { get; }
+        IEnumerable<ArchivingActionTemplate> WatchedArchivingActionTemplates { get; }
 
-        void Watch(ArchivingActionTemplate archive);
+        void Watch(IEnumerable<ArchivingActionTemplate> archive);
 
         void Stop();
 
