@@ -71,7 +71,8 @@ namespace ArchiveMonkey.Worker
             logger.Debug("File system action for {0}: {1}.", e.FullPath, e.ChangeType);
             if (!e.Name.ToLower().StartsWith("archive"))
             {
-                // ensure change notification is only triggered when a file has been created (so changes are basically done)
+                // we need a change information if a new item is created. however david normally causes to file system notifications. one for the create. and a change when it's done.
+                // so only notify if the action is finished.
                 switch (e.ChangeType) 
                 {
                     case WatcherChangeTypes.Created:

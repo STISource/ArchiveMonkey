@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using ArchiveMonkey.Services;
 using ArchiveMonkey.Settings.Models;
 using NLog;
@@ -101,7 +102,17 @@ namespace ArchiveMonkey.Worker
                     continue;
                 }
 
-                this.archiver.Archive(action);
+                if (string.IsNullOrEmpty(action.Item))
+                {
+                    logger.Info("Start archiving of latest changes synchronously.");
+                    this.archiver.Archive(action);
+                }
+                else
+                {
+                    // work archiving of items in parallel.
+                    logger.Info("Start archiving of item asynchronously.");
+                    Task.Run(() => this.archiver.Archive(action));                    
+                }
             }
 
             logger.Info("Processing worker queue finished.");

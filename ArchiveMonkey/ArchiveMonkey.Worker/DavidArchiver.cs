@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using ArchiveMonkey.Services;
@@ -121,76 +122,119 @@ namespace ArchiveMonkey.Worker
 
         private void ArchiveItem(ArchivingAction action)
         {
-            logger.Info("Archiving of {0} from {1} - {2} to {3} - {4}", action.Item, action.SourceArchiveName, action.SourcePath, action.TargetArchiveName, action.TargetPath);
+            var actionGuid = Guid.NewGuid();
+
+            logger.Info("ActionGuid {0}: Archiving of {1} from {2} - {3} to {4} - {5}", actionGuid, action.Item, action.SourceArchiveName, action.SourcePath, action.TargetArchiveName, action.TargetPath);
 
             int numberOfRetries = action.RetryCount.HasValue && action.RetryCount.Value > 0 ? action.RetryCount.Value : 0;
             int delay = action.RetryDelay ?? 20;
+            var processedIds = new List<int>();
 
             for (int tryCount = 0; tryCount <= numberOfRetries; tryCount++)
             {
-                logger.Debug("{0}. try ...", tryCount + 1);
+                logger.Info("ActionGuid {0}: {1}. try ...", actionGuid, tryCount + 1);
                 bool retryNeeded = true;
                 try
                 {
                     var davidAccount = this.ConnectToDavidServer();
-                    logger.Debug("Connected to David server {0}.", this.login.Server);
+                    logger.Debug("ActionGuid {0}: Connected to David server {1}.", actionGuid, this.login.Server);
 
                     var sourceArchive = davidAccount.GetArchive(action.SourcePath);
                     var targetArchive = davidAccount.GetArchive(action.TargetPath);
 
-                    logger.Debug("Found {0} mail items in source archive.", sourceArchive.MailItems.Count);
+                    logger.Info("ActionGuid {0}: Found {1} mail items in source archive.", actionGuid, sourceArchive.MailItems.Count);
+                    var mailFound = false;
+                    int expectedEntries = 0;
 
                     for (int i = 0; i < sourceArchive.MailItems.Count; i++)
                     {
                         var item = sourceArchive.MailItems.Item(i);
                         if (!(item is MailItem))
                         {
-                            logger.Warn("Item is not a mail item. Subject: {0}", item.Subject);
+                            logger.Warn("ActionGuid {0}: Item is not a mail item. Subject: {1}", actionGuid, item.Subject);
                             continue;
                         }
 
                         var mail = (MailItem)item;
-                        logger.Debug("Testing item {0}: {1}, Mail date: {2}, External: {3}", i, mail.TextSource.ToLower(), mail.StatusTime, mail.IsExternal);
+                        logger.Debug("ActionGuid {0}: Testing item {1}: {2}, Mail date: {3}, External: {4}", actionGuid, i, mail.TextSource.ToLower(), mail.StatusTime, mail.IsExternal);
 
                         if (mail.TextSource.ToLower() != action.Item.ToLower())
                         {
-                            logger.Debug("This is not the right mail.");
+                            logger.Debug("ActionGuid {0}: This is not the right mail.", actionGuid);
                             continue;
                         }
 
-                        logger.Info("Found right mail. From {0} To {1} at {2}", mail.From.EMail, mail.Destination, mail.StatusTime);
+                        logger.Info("ActionGuid {0}: Found right mail. From {1} To {2} at {3}", actionGuid, mail.From.EMail, mail.Destination, mail.StatusTime);
 
-                        retryNeeded = false;                        
-                            
+                        // we've found the right mail. But possibly there are more entries in the archive for that same mail in case of outgoing.
+                        // that is david style for outgoing mails. Multiple entries just because there are multiple recipients.
+                        // As some recipients/entries for that mail might be external and some internal let's not break this iteration hastily.
+                        // let's just look how much more entries to expect                        
+                        if (!mailFound)
+                        {
+                            expectedEntries = !mail.Received ? mail.Recipients.Count + mail.CC.Count + mail.BCC.Count : 1;
+                            expectedEntries = expectedEntries - processedIds.Count;
+                        }
+                        mailFound = true;
+
+                        if (processedIds.Contains((int)mail._ID))
+                        {
+                            logger.Info("ActionGuid {0}: Mail has already been processed in case of multiple outgoing recipients.", actionGuid);
+                            continue;
+                        }                        
+                        
+                        expectedEntries--;
+                        processedIds.Add((int)mail._ID);
+
                         if (!mail.IsExternal)
                         {
-                            logger.Info("Internal mail. No action taken.");
-                            break;
+                            logger.Info("ActionGuid {0}: Internal mail. No action taken.", actionGuid);                            
+                            if(expectedEntries < 1)
+                            {
+                                retryNeeded = false;
+                                break;
+                            }
+
+                            logger.Info("ActionGuid {0}: {1} more recipient mail entries expected.", actionGuid, expectedEntries);
+                            continue;
                         }
 
                         if (action.Filter != null)
                         {
                             try
                             {
-                                logger.Info("Applying filter {0}", action.Filter.ToString());
+                                logger.Info("ActionGuid {0}: Applying filter {1}", actionGuid, action.Filter.ToString());
                                 if(!action.Filter.FilterApplies(mail))
                                 {
-                                    logger.Info("Filter does not match.");
-                                    break;
+                                    logger.Info("ActionGuid {0}: Filter does not match.", actionGuid);
+                                    if (expectedEntries < 1)
+                                    {
+                                        retryNeeded = false;
+                                        break;
+                                    }
+
+                                    logger.Info("ActionGuid {0}: {1} more recipient mail entries expected.", actionGuid, expectedEntries);
+                                    continue;
                                 }
                             }
                             catch (Exception ex)
                             {
-                                logger.Error("Could not evaluate filter. Exception: {0}", ex.Message);
-                                break;
+                                logger.Error("ActionGuid {0}: Could not evaluate filter. Exception: {1}", actionGuid, ex.Message);
+                                if (expectedEntries < 1)
+                                {
+                                    retryNeeded = false;
+                                    break;
+                                }
+
+                                logger.Info("ActionGuid {0}: {1} more recipient mail entries expected.", actionGuid, expectedEntries);
+                                continue;
                             }
 
-                            logger.Info("Filter matches.");
+                            logger.Info("ActionGuid {0}: Filter matches.", actionGuid);
                         }
 
-                        logger.Debug("Copying ...");
-                        mail.Copy(targetArchive);
-                        retryNeeded = false;                                
+                        logger.Info("ActionGuid {0}: Copying ...", actionGuid);
+                        mail.Copy(targetArchive);                                                  
 
                         // add history entry
                         this.historyService.AddToHistory(new HistoryEntry
@@ -204,19 +248,27 @@ namespace ArchiveMonkey.Worker
                             AdditionalInfo3 = mail.Subject
                         });
 
-                        // if we successfully archived a email there is no further need to iterate through this archive
-                        break;
+                        // if we successfully archived an email there is no further need to iterate through except we expect more entries
+                        if (expectedEntries < 1)
+                        {
+                            retryNeeded = false;
+                            break;
+                        }
+
+                        logger.Info("ActionGuid {0}: {1} more recipient mail entries expected.", actionGuid, expectedEntries);
+                        continue;
                     }
 
                     davidAccount.Logoff();
                 }
                 catch (Exception ex)
                 {
-                    logger.Error(ex, "{0}\n{1}\n{2}", "Error during archiving of mail item.", ex.Message, ex.StackTrace);
+                    logger.Error(ex, "ActionGuid {0}: {1}\n{2}\n{3}", actionGuid, "Error during archiving of mail item.", ex.Message, ex.StackTrace);
                 }
 
                 if(retryNeeded && tryCount < numberOfRetries)
                 {
+                    logger.Info("ActionGuid {0}: Retry needed.", actionGuid);
                     Thread.Sleep(delay * 1000);
                 }
                 else
@@ -225,7 +277,7 @@ namespace ArchiveMonkey.Worker
                 }
             }
 
-            logger.Info("Archiving of {0} from {1} to {2} finished.", action.Item, action.SourceArchiveName, action.TargetArchiveName);
+            logger.Info("ActionGuid {0}: Archiving of {1} from {2} to {3} finished.", actionGuid, action.Item, action.SourceArchiveName, action.TargetArchiveName);
         }
 
         private Account ConnectToDavidServer()

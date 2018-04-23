@@ -6,8 +6,8 @@ namespace ArchiveMonkey.Settings.Models
     [DataContract]
     public partial class ArchivingActionTemplate : BasePropertyChanged
     {
-        private const int DefaultRetryDelay = 30;
-        private const int DefaultRetryCount = 5;
+        private const int DefaultRetryDelay = 20;
+        private const int DefaultRetryCount = 10;
 
         private Guid actionId;
         private ArchivingActionType actionType;

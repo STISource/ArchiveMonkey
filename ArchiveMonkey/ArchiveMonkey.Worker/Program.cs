@@ -75,8 +75,7 @@ namespace ArchiveMonkey.Worker
                     {
                         logger.Info("Processing queue finished. Stopping program...");
                         break;
-                    }
-                    
+                    }                    
                 }
 
                 Thread.Sleep(500);
