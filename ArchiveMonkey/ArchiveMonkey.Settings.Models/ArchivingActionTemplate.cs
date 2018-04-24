@@ -19,6 +19,7 @@ namespace ArchiveMonkey.Settings.Models
         private int? retryDelay;
         private string filter;
         private int sequence;
+        private bool handleSynchronously;
 
         public ArchivingActionTemplate()
         {
@@ -200,7 +201,6 @@ namespace ArchiveMonkey.Settings.Models
         }
 
         [DataMember]
-
         public int Sequence
         {
             get
@@ -217,10 +217,29 @@ namespace ArchiveMonkey.Settings.Models
                 }
             }
         }
+
+        [DataMember]
+        public bool HandleSynchronously
+        {
+            get
+            {
+                return this.handleSynchronously;
+            }
+
+            set
+            {
+                if(this.handleSynchronously != value)
+                {
+                    this.handleSynchronously = value;
+                    this.RaisePropertyChanged("HandleSynchronously");
+                }
+            }
+        }
     }
 
     public enum ArchivingActionType
     {
-        Copy = 1        
+        Copy = 1,
+        Move = 2
     }
 }

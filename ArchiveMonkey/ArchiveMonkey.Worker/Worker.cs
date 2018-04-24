@@ -109,9 +109,16 @@ namespace ArchiveMonkey.Worker
                 }
                 else
                 {
-                    // work archiving of items in parallel.
-                    logger.Info("Start archiving of item asynchronously.");
-                    Task.Run(() => this.archiver.Archive(action));                    
+                    if(action.HandleSynchronously)
+                    {
+                        logger.Info("Start archiving of item synchronously.");
+                        this.archiver.Archive(action);
+                    }
+                    else
+                    {
+                        logger.Info("Start archiving of item asynchronously.");
+                        Task.Run(() => this.archiver.Archive(action));
+                    }                    
                 }
             }
 

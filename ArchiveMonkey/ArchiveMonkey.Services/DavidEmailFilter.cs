@@ -44,7 +44,12 @@ namespace ArchiveMonkey.Services
                     }
 
                     applies = this.comparer == EmailAttributeComparer.Contains ? recipients.Contains(this.value) : !recipients.Contains(this.value);
-                    break;                    
+                    break;
+
+                case EmailAttribute.Sender:
+
+                    applies = this.comparer == EmailAttributeComparer.Is ? mailItem.From.EMail.ToLower() == this.value : mailItem.From.EMail.ToLower() != this.value;
+                    break;
             }
 
             return applies;
@@ -58,21 +63,34 @@ namespace ArchiveMonkey.Services
         public static bool IsValidFilter(string filter)
         {
             var elements = filter.Split(' ');
+            EmailAttribute filterAttribute = EmailAttribute.RecipientList;
+            EmailAttributeComparer filterComparer = EmailAttributeComparer.Contains;
 
-            return elements.Length == 3
-                    && Enum.TryParse<EmailAttribute>(elements[0], out EmailAttribute attribute)
-                    && Enum.TryParse<EmailAttributeComparer>(elements[1], out EmailAttributeComparer comparer);
+            bool parsable = elements.Length == 3
+                    && Enum.TryParse<EmailAttribute>(elements[0], out filterAttribute)
+                    && Enum.TryParse<EmailAttributeComparer>(elements[1], out filterComparer);
+
+            if(!parsable)
+            {
+                return false;
+            }
+
+            return (filterAttribute == EmailAttribute.RecipientList && (filterComparer == EmailAttributeComparer.Contains || filterComparer == EmailAttributeComparer.ContainsNot))
+                || (filterAttribute == EmailAttribute.Sender && (filterComparer == EmailAttributeComparer.Is || filterComparer == EmailAttributeComparer.IsNot));
         }
 
         private enum EmailAttribute
         {
-            RecipientList = 1
+            RecipientList = 1,
+            Sender = 2
         }
 
         private enum EmailAttributeComparer
         {
             Contains = 1,
-            NotContains = 2
+            ContainsNot = 2,
+            Is = 3,
+            IsNot = 4
         }
     }
 }

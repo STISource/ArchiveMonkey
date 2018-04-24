@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using ArchiveMonkey.Services;
+using ArchiveMonkey.Settings.Models;
 using DvApi32;
 using NLog;
 
@@ -95,6 +96,12 @@ namespace ArchiveMonkey.Worker
                         
                         logger.Info("Copying mail {0} from {1} to {2}", mail.TextSource, action.SourceArchiveName, action.TargetArchiveName);
                         mail.Copy(targetArchive);
+
+                        if(action.ActionType == ArchivingActionType.Move)
+                        {
+                            logger.Info("Removing mail {0} from {1} as the configured action type is \"move\"", mail.TextSource, action.SourceArchiveName);
+                            mail.Delete();
+                        }
 
                         // add history entry
                         this.historyService.AddToHistory(new HistoryEntry
@@ -234,7 +241,13 @@ namespace ArchiveMonkey.Worker
                         }
 
                         logger.Info("ActionGuid {0}: Copying ...", actionGuid);
-                        mail.Copy(targetArchive);                                                  
+                        mail.Copy(targetArchive);
+
+                        if (action.ActionType == ArchivingActionType.Move)
+                        {
+                            logger.Info("ActionGuid {0}: Removing mail {1} from {2} as the configured action type is \"move\"", actionGuid, action.Item, action.SourceArchiveName);
+                            mail.Delete();
+                        }
 
                         // add history entry
                         this.historyService.AddToHistory(new HistoryEntry

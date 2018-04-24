@@ -78,6 +78,7 @@
                     <DataGridComboBoxColumn Header="Action" ItemsSource="{Binding Root.DataContext.ArchivingActionTypes, Source={StaticResource Proxy}}" SelectedItemBinding="{Binding ActionType}" />                    
                     <DataGridTextColumn Header="Custom Filter" Binding="{Binding Filter, Mode=TwoWay}" />
                     <DataGridTextColumn Header="Sequence" Binding="{Binding Sequence, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource IntToStringConverter}}" />
+                    <DataGridCheckBoxColumn Header="Run Synchr." Binding="{Binding HandleSynchronously, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     <DataGridTextColumn Header="Retry count" Binding="{Binding RetryCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource IntToStringConverter}}" />
                     <DataGridTextColumn Header="Retry delay (s)" Binding="{Binding RetryDelay, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource IntToStringConverter}}" />
                 </DataGrid.Columns>
