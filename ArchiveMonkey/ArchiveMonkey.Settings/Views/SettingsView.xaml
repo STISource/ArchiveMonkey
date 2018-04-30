@@ -75,7 +75,8 @@
                 <DataGrid.Columns>
                     <DataGridComboBoxColumn Header="From" ItemsSource="{Binding Root.DataContext.Settings.Archives, Source={StaticResource Proxy}}" SortMemberPath="InputArchive.DisplayName" SelectedItemBinding="{Binding InputArchive}" />
                     <DataGridComboBoxColumn Header="To" ItemsSource="{Binding Root.DataContext.Settings.Archives, Source={StaticResource Proxy}}" SortMemberPath="OutArchive.DisplayName" SelectedItemBinding="{Binding OutputArchive}" />
-                    <DataGridComboBoxColumn Header="Action" ItemsSource="{Binding Root.DataContext.ArchivingActionTypes, Source={StaticResource Proxy}}" SelectedItemBinding="{Binding ActionType}" />                    
+                    <DataGridComboBoxColumn Header="Action" ItemsSource="{Binding Root.DataContext.ArchivingActionTypes, Source={StaticResource Proxy}}" SelectedItemBinding="{Binding ActionType}" />
+                    <DataGridCheckBoxColumn Header="Include Internal Items" Binding="{Binding IncludeInternalItems, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     <DataGridTextColumn Header="Custom Filter" Binding="{Binding Filter, Mode=TwoWay}" />
                     <DataGridTextColumn Header="Sequence" Binding="{Binding Sequence, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource IntToStringConverter}}" />
                     <DataGridCheckBoxColumn Header="Run Synchr." Binding="{Binding HandleSynchronously, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />

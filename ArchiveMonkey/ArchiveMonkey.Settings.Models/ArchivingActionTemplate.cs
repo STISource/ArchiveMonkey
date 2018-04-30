@@ -20,6 +20,7 @@ namespace ArchiveMonkey.Settings.Models
         private string filter;
         private int sequence;
         private bool handleSynchronously;
+        private bool includeInternalItems;
 
         public ArchivingActionTemplate()
         {
@@ -234,6 +235,25 @@ namespace ArchiveMonkey.Settings.Models
                     this.RaisePropertyChanged("HandleSynchronously");
                 }
             }
+        }
+
+        [DataMember]
+        public bool IncludeInternalItems
+        {
+            get
+            {
+                return this.includeInternalItems;
+            }
+
+            set
+            {
+                if(this.includeInternalItems != value)
+                {
+                    this.includeInternalItems = value;
+                    this.RaisePropertyChanged("IncludeInternalItems");
+                }
+            }
+
         }
     }
 

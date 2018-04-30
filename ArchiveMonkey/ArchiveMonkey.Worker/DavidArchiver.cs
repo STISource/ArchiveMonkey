@@ -68,7 +68,7 @@ namespace ArchiveMonkey.Worker
 
                     logger.Debug("Testing item {0}: {1}, Mail date: {2}, External: {2}", i, mail.TextSource.ToLower(), mail.StatusTime, mail.IsExternal);
 
-                    if (mail.IsExternal == true
+                    if ((mail.IsExternal == true || action.IncludeInternalItems)
                         && mailSendRecievedDate > considerMailsFrom
                         && !historyEntries.Any(x => x.ArchivedItem == mail.TextSource.ToLower()))
                     {
@@ -193,9 +193,9 @@ namespace ArchiveMonkey.Worker
                         expectedEntries--;
                         processedIds.Add((int)mail._ID);
 
-                        if (!mail.IsExternal)
+                        if (!mail.IsExternal && !action.IncludeInternalItems)
                         {
-                            logger.Info("ActionGuid {0}: Internal mail. No action taken.", actionGuid);                            
+                            logger.Info("ActionGuid {0}: Internal mail. No internal mails to be included here. No action taken.", actionGuid);                            
                             if(expectedEntries < 1)
                             {
                                 retryNeeded = false;

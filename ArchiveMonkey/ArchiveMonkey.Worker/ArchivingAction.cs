@@ -18,7 +18,8 @@ namespace ArchiveMonkey.Worker
                 RetryCount = template.RetryCount,
                 RetryDelay = template.RetryDelay,
                 Filter = !string.IsNullOrWhiteSpace(template.Filter) ? filterService.CreateFilter(template.Filter) : null,
-                HandleSynchronously = template.HandleSynchronously
+                HandleSynchronously = template.HandleSynchronously,
+                IncludeInternalItems = template.IncludeInternalItems
             };
         }
 
@@ -41,5 +42,7 @@ namespace ArchiveMonkey.Worker
         public IFilter Filter { get; set; }
 
         public bool HandleSynchronously { get; set; }
+
+        public bool IncludeInternalItems { get; set; }
     }
 }
