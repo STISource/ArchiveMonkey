@@ -72,7 +72,7 @@ namespace ArchiveMonkey.Worker
                         && mailSendRecievedDate > considerMailsFrom
                         && !historyEntries.Any(x => x.ArchivedItem == mail.TextSource.ToLower()))
                     {
-                        logger.Debug("Found external mail that has not yet been archived. From {0} To {1} at {2}", mail.From.EMail, mail.Destination, mail.StatusTime);
+                        logger.Debug("Found mail that has not yet been archived. From {0} To {1} at {2}", mail.From.EMail, mail.Destination, mail.StatusTime);
 
                         if (action.Filter != null)
                         {

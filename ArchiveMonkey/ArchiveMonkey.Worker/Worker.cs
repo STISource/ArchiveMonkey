@@ -44,7 +44,7 @@ namespace ArchiveMonkey.Worker
         {
             logger.Info("Worker starting ...");
 
-            foreach(var actionGroup in this.settings.ArchivingActionTemplates.GroupBy(x => x.InputArchiveId))
+            foreach(var actionGroup in this.settings.ArchivingActionTemplates.OrderBy(x => x.InputArchive.Path).GroupBy(x => x.InputArchiveId))
             {
                 IArchiveWatcher watcher = null;
                 try
