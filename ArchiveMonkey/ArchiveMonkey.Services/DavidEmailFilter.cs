@@ -9,6 +9,7 @@ namespace ArchiveMonkey.Services
         private EmailAttribute attribute;
         private EmailAttributeComparer comparer;
         private string value;
+        private IEnumerable<string> values;
 
         public DavidEmailFilter(string filter)
         {
@@ -22,6 +23,7 @@ namespace ArchiveMonkey.Services
             this.attribute = (EmailAttribute)Enum.Parse(typeof(EmailAttribute), elements[0]);
             this.comparer = (EmailAttributeComparer)Enum.Parse(typeof(EmailAttributeComparer), elements[1]);
             this.value = elements[2].ToLower();
+            this.values = elements[2].Split(',');
         }       
 
         public bool FilterApplies(object itemToArchive)
@@ -43,7 +45,22 @@ namespace ArchiveMonkey.Services
                         recipients.Add(mailItem.CC.Item(i).EMail.ToLower());
                     }
 
-                    applies = this.comparer == EmailAttributeComparer.Contains ? recipients.Contains(this.value) : !recipients.Contains(this.value);
+                    if(this.comparer == EmailAttributeComparer.Contains || this.comparer == EmailAttributeComparer.ContainsNot)
+                    {
+                        applies = this.comparer == EmailAttributeComparer.Contains ? recipients.Contains(this.value) : !recipients.Contains(this.value);
+                    }
+                    else
+                    {
+                        int hits = 0;
+
+                        foreach(var currentValue in this.values)
+                        {
+                            hits = recipients.Contains(currentValue) ? hits + 1 : hits;
+                        }
+
+                        applies = this.comparer == EmailAttributeComparer.ContainsAny ? hits > 0 : hits == 0;
+                    }
+                    
                     break;
 
                 case EmailAttribute.Sender:
@@ -75,7 +92,11 @@ namespace ArchiveMonkey.Services
                 return false;
             }
 
-            return (filterAttribute == EmailAttribute.RecipientList && (filterComparer == EmailAttributeComparer.Contains || filterComparer == EmailAttributeComparer.ContainsNot))
+            return (filterAttribute == EmailAttribute.RecipientList 
+                    && (filterComparer == EmailAttributeComparer.Contains 
+                        || filterComparer == EmailAttributeComparer.ContainsNot
+                        || filterComparer == EmailAttributeComparer.ContainsAny
+                        || filterComparer == EmailAttributeComparer.ContainsNoneOf))
                 || (filterAttribute == EmailAttribute.Sender && (filterComparer == EmailAttributeComparer.Is || filterComparer == EmailAttributeComparer.IsNot));
         }
 
@@ -90,7 +111,9 @@ namespace ArchiveMonkey.Services
             Contains = 1,
             ContainsNot = 2,
             Is = 3,
-            IsNot = 4
+            IsNot = 4,
+            ContainsAny = 5,
+            ContainsNoneOf = 6
         }
     }
 }
