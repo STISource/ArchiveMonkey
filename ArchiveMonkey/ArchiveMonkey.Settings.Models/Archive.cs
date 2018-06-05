@@ -7,6 +7,8 @@ namespace ArchiveMonkey.Settings.Models
     public partial class Archive : BasePropertyChanged
     {
         private Guid archiveId;
+        private string baseLocalPath;
+        private string baseNetworkPath;
         private string path;
         private string displayName;
 
@@ -33,6 +35,42 @@ namespace ArchiveMonkey.Settings.Models
             }
         }
 
+        [DataMember]
+        public string BaseLocalPath
+        {
+            get
+            {
+                return this.baseLocalPath;
+            }
+            set
+            {
+                if (this.baseLocalPath != value)
+                {
+                    this.baseLocalPath = value;
+                    this.RaisePropertyChanged("BaseLocalPath");
+                    this.RaisePropertyChanged("FullLocalPath");
+                }
+            }
+        }
+
+        [DataMember]
+        public string BaseNetworkPath
+        {
+            get
+            {
+                return this.baseNetworkPath;
+            }
+            set
+            {
+                if (this.baseNetworkPath != value)
+                {
+                    this.baseNetworkPath = value;
+                    this.RaisePropertyChanged("BaseNetworkPath");
+                    this.RaisePropertyChanged("FullNetworkPath");
+                }
+            }
+        }
+
         [DataMember(IsRequired = true)]
         public string Path
         {
@@ -47,9 +85,11 @@ namespace ArchiveMonkey.Settings.Models
                 {
                     this.path = value;
                     this.RaisePropertyChanged("Path");
+                    this.RaisePropertyChanged("FullLocalPath");
+                    this.RaisePropertyChanged("FullNetworkPath");
                 }
             }
-        }
+        }        
 
         [DataMember(IsRequired = true)]
         public string DisplayName
@@ -67,6 +107,16 @@ namespace ArchiveMonkey.Settings.Models
                     this.RaisePropertyChanged("DisplayName");
                 }
             }
+        }
+
+        public string FullLocalPath
+        {
+            get { return string.IsNullOrEmpty(this.BaseLocalPath) ? this.Path : this.BaseLocalPath + this.Path; }
+        }
+
+        public string FullNetworkPath
+        {
+            get { return string.IsNullOrEmpty(this.BaseNetworkPath) ? this.Path : this.BaseNetworkPath + this.Path; }
         }
 
         public override string ToString()

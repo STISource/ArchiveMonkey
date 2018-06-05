@@ -7,6 +7,8 @@ namespace ArchiveMonkey.Settings.Models
     [DataContract]
     public partial class ArchiveMonkeySettings : BasePropertyChanged
     {
+        private string baseLocalPath;
+        private string baseNetworkPath;
         private ObservableCollection<Archive> archives;
         private ObservableCollection<ArchivingActionTemplate> archivingActions;
 
@@ -14,6 +16,42 @@ namespace ArchiveMonkey.Settings.Models
         {
             this.Archives = new ObservableCollection<Archive>();
             this.ArchivingActionTemplates = new ObservableCollection<ArchivingActionTemplate>();
+        }
+
+        [DataMember]
+        public string BaseLocalPath
+        {
+            get
+            {
+                return this.baseLocalPath;
+            }
+            set
+            {
+                if(this.baseLocalPath != value)
+                {
+                    this.baseLocalPath = value;
+                    this.RaisePropertyChanged("BaseLocalPath");
+                    this.UpdateBaseLocalPathInArchives();
+                }
+            }
+        }
+
+        [DataMember]
+        public string BaseNetworkPath
+        {
+            get
+            {
+                return this.baseNetworkPath;
+            }
+            set
+            {
+                if (this.baseNetworkPath != value)
+                {
+                    this.baseNetworkPath = value;
+                    this.RaisePropertyChanged("BaseNetworkPath");
+                    this.UpdateBaseNetworkPathInArchives();
+                }
+            }
         }
 
         [DataMember]
@@ -49,6 +87,22 @@ namespace ArchiveMonkey.Settings.Models
                     this.archivingActions = value;
                     this.RaisePropertyChanged("ArchivingActionTemplates");
                 }
+            }
+        }
+        
+        public void UpdateBaseLocalPathInArchives()
+        {
+            foreach(var archive in this.Archives)
+            {
+                archive.BaseLocalPath = this.BaseLocalPath;
+            }
+        }
+
+        public void UpdateBaseNetworkPathInArchives()
+        {
+            foreach (var archive in this.Archives)
+            {
+                archive.BaseNetworkPath = this.BaseNetworkPath;
             }
         }
 

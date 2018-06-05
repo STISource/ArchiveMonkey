@@ -10,9 +10,13 @@ namespace ArchiveMonkey.Worker
             return new ArchivingAction
             {
                 ActionType = template.ActionType,
-                SourcePath = template.InputArchive.Path,
+                RelativeSourcePath = template.InputArchive.Path,
+                FullLocalSourcePath = template.InputArchive.FullLocalPath,
+                FullNetworkSourcePath = template.InputArchive.FullNetworkPath,
                 SourceArchiveName = template.InputArchive.DisplayName,
-                TargetPath = template.OutputArchive.Path,
+                RelativeTargetPath = template.OutputArchive.Path,
+                FullLocalTargetPath = template.OutputArchive.FullLocalPath,
+                FullNetworkTargetPath = template.OutputArchive.FullNetworkPath,
                 TargetArchiveName = template.OutputArchive.DisplayName,
                 Item = item,
                 RetryCount = template.RetryCount,
@@ -23,11 +27,19 @@ namespace ArchiveMonkey.Worker
             };
         }
 
-        public string SourcePath { get; set; }
+        public string RelativeSourcePath { get; set; }
+
+        public string FullLocalSourcePath { get; set; }
+
+        public string FullNetworkSourcePath { get; set; }
 
         public string SourceArchiveName { get; set; }
 
-        public string TargetPath { get; set; }
+        public string RelativeTargetPath { get; set; }
+
+        public string FullLocalTargetPath { get; set; }
+
+        public string FullNetworkTargetPath { get; set; }
 
         public string TargetArchiveName { get; set; }
 

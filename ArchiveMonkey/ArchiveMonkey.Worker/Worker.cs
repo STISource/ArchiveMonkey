@@ -33,7 +33,7 @@ namespace ArchiveMonkey.Worker
             this.filterService = iocContainer.Resolve<IFilterService>();
             this.Processing = false;
 
-            foreach (var action in this.settings.ArchivingActionTemplates.OrderBy(x => x.InputArchive.Path).ThenBy(y => y.Sequence))
+            foreach (var action in this.settings.ArchivingActionTemplates.OrderBy(x => x.InputArchive.FullNetworkPath).ThenBy(y => y.Sequence))
             {
                 // create one queue entry for every archiving action to ensure changes are processed that might have been missed since last program run
                 this.queue.Enqueue(ArchivingAction.FromTemplate(action, this.filterService));
@@ -44,7 +44,7 @@ namespace ArchiveMonkey.Worker
         {
             logger.Info("Worker starting ...");
 
-            foreach(var actionGroup in this.settings.ArchivingActionTemplates.OrderBy(x => x.InputArchive.Path).GroupBy(x => x.InputArchiveId))
+            foreach(var actionGroup in this.settings.ArchivingActionTemplates.OrderBy(x => x.InputArchive.FullLocalPath).GroupBy(x => x.InputArchiveId))
             {
                 IArchiveWatcher watcher = null;
                 try
@@ -138,8 +138,8 @@ namespace ArchiveMonkey.Worker
             return action1 != null && action2 != null
                 && action1.ActionType == action2.ActionType
                 && action1.Item == action2.Item
-                && action1.SourcePath == action2.SourcePath
-                && action1.TargetPath == action2.TargetPath;
+                && action1.FullLocalSourcePath == action2.FullLocalSourcePath
+                && action1.FullLocalTargetPath == action2.FullLocalTargetPath;
         }
     }
 }

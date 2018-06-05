@@ -39,21 +39,21 @@ namespace ArchiveMonkey.Worker
                 logger.Debug("Path does not exist: {0}", sourceArchive.Path);
                 throw new ArgumentException("Invalid input path");
             }
-            this.watcher.Path = sourceArchive.Path;
+            this.watcher.Path = sourceArchive.FullLocalPath;            
             this.watcher.IncludeSubdirectories = false;
-
+            
             this.watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName;
             this.watcher.Filter = "*" + mailExtension; // should be sufficient to identify new incoming email
-
-            // Add event handlers.
+                        
             this.watcher.Changed += WatchedFolderChanged;
             this.watcher.Created += WatchedFolderChanged;    
             this.watcher.Renamed += WatchedFolderChanged;
+            this.watcher.Error += WatcherError;
 
             this.watcher.EnableRaisingEvents = true;
 
-            logger.Info("Watching {0} started.", sourceArchive.Path);            
-        }
+            logger.Info("Watching {0} for {1} started.", this.watcher.Path, sourceArchive.DisplayName);            
+        }        
 
         public void Stop()
         {
@@ -61,6 +61,7 @@ namespace ArchiveMonkey.Worker
             this.watcher.Changed -= WatchedFolderChanged;
             this.watcher.Created -= WatchedFolderChanged;
             this.watcher.Renamed -= WatchedFolderChanged;
+            this.watcher.Error -= WatcherError;
             this.watcher.Dispose();
 
             logger.Info("Watching {0} stopped.", this.WatchedArchivingActionTemplates.First().InputArchive.Path);
@@ -98,7 +99,12 @@ namespace ArchiveMonkey.Worker
                         break;
                 }                
             }
-        }        
+        }
+
+        private void WatcherError(object sender, ErrorEventArgs e)
+        {
+            logger.Error(e.GetException());
+        }
 
         private void RaiseInputArchiveChanged(ArchivingAction action)
         {

@@ -35,9 +35,9 @@ namespace ArchiveMonkey.Worker
         
         private void ArchiveLatestChanges(ArchivingAction action)
         {
-            logger.Info("Archiving latest changes from {0} - {1} to {2} - {3}", action.SourceArchiveName, action.SourcePath, action.TargetArchiveName, action.TargetPath);
+            logger.Info("Archiving latest changes from {0} - {1} to {2} - {3}", action.SourceArchiveName, action.RelativeSourcePath, action.TargetArchiveName, action.RelativeTargetPath);
 
-            var historyEntries = this.historyService.ReadHistory(action.SourcePath);            
+            var historyEntries = this.historyService.ReadHistory(action.FullNetworkSourcePath);            
 
             if(!historyEntries.Any())
             {
@@ -49,8 +49,8 @@ namespace ArchiveMonkey.Worker
             {                
                 var davidAccount = this.ConnectToDavidServer();
 
-                var sourceArchive = davidAccount.GetArchive(action.SourcePath);
-                var targetArchive = davidAccount.GetArchive(action.TargetPath);
+                var sourceArchive = davidAccount.GetArchive(action.FullNetworkSourcePath);
+                var targetArchive = davidAccount.GetArchive(action.FullNetworkTargetPath);
 
                 var considerMailsFrom = historyEntries.Max(x => x.ArchivingDate).AddDays(-1); // ensure no mail is lost
 
@@ -107,8 +107,8 @@ namespace ArchiveMonkey.Worker
                         this.historyService.AddToHistory(new HistoryEntry
                         {
                             ArchivingDate = DateTime.Now,
-                            SourcePath = action.SourcePath,
-                            TargetPath = action.TargetPath,
+                            SourcePath = action.FullNetworkSourcePath,
+                            TargetPath = action.FullNetworkTargetPath,
                             ArchivedItem = mail.TextSource.ToLower(),
                             AdditionalInfo1 = mail.From.EMail,
                             AdditionalInfo2 = mail.Destination,
@@ -130,12 +130,15 @@ namespace ArchiveMonkey.Worker
         private void ArchiveItem(ArchivingAction action)
         {
             var actionGuid = Guid.NewGuid();
+            var fullNetworkPathOfItem = action.Item
+                                            .ToLower()
+                                            .Replace(action.FullLocalSourcePath.ToLower(), action.FullNetworkSourcePath.ToLower());
 
-            logger.Info("ActionGuid {0}: Archiving of {1} from {2} - {3} to {4} - {5}", actionGuid, action.Item, action.SourceArchiveName, action.SourcePath, action.TargetArchiveName, action.TargetPath);
+            logger.Info("ActionGuid {0}: Archiving of {1} from {2} - {3} to {4} - {5}", actionGuid, fullNetworkPathOfItem, action.SourceArchiveName, action.RelativeSourcePath, action.TargetArchiveName, action.RelativeTargetPath);
 
             int numberOfRetries = action.RetryCount.HasValue && action.RetryCount.Value > 0 ? action.RetryCount.Value : 0;
             int delay = action.RetryDelay ?? 20;
-            var processedIds = new List<int>();
+            var processedIds = new List<int>();            
 
             for (int tryCount = 0; tryCount <= numberOfRetries; tryCount++)
             {
@@ -146,8 +149,8 @@ namespace ArchiveMonkey.Worker
                     var davidAccount = this.ConnectToDavidServer();
                     logger.Debug("ActionGuid {0}: Connected to David server {1}.", actionGuid, this.login.Server);
 
-                    var sourceArchive = davidAccount.GetArchive(action.SourcePath);
-                    var targetArchive = davidAccount.GetArchive(action.TargetPath);
+                    var sourceArchive = davidAccount.GetArchive(action.FullNetworkSourcePath);
+                    var targetArchive = davidAccount.GetArchive(action.FullNetworkTargetPath);
 
                     logger.Info("ActionGuid {0}: Found {1} mail items in source archive.", actionGuid, sourceArchive.MailItems.Count);
                     var mailFound = false;
@@ -165,7 +168,7 @@ namespace ArchiveMonkey.Worker
                         var mail = (MailItem)item;
                         logger.Debug("ActionGuid {0}: Testing item {1}: {2}, Mail date: {3}, External: {4}", actionGuid, i, mail.TextSource.ToLower(), mail.StatusTime, mail.IsExternal);
 
-                        if (mail.TextSource.ToLower() != action.Item.ToLower())
+                        if (mail.TextSource.ToLower() != fullNetworkPathOfItem)
                         {
                             logger.Debug("ActionGuid {0}: This is not the right mail.", actionGuid);
                             continue;
@@ -245,7 +248,7 @@ namespace ArchiveMonkey.Worker
 
                         if (action.ActionType == ArchivingActionType.Move)
                         {
-                            logger.Info("ActionGuid {0}: Removing mail {1} from {2} as the configured action type is \"move\"", actionGuid, action.Item, action.SourceArchiveName);
+                            logger.Info("ActionGuid {0}: Removing mail {1} from {2} as the configured action type is \"move\"", actionGuid, fullNetworkPathOfItem, action.SourceArchiveName);
                             mail.Delete();
                         }
 
@@ -253,9 +256,9 @@ namespace ArchiveMonkey.Worker
                         this.historyService.AddToHistory(new HistoryEntry
                         {
                             ArchivingDate = DateTime.Now,
-                            SourcePath = action.SourcePath,
-                            TargetPath = action.TargetPath,
-                            ArchivedItem = action.Item.ToLower(),
+                            SourcePath = action.FullNetworkSourcePath,
+                            TargetPath = action.FullNetworkTargetPath,
+                            ArchivedItem = fullNetworkPathOfItem,
                             AdditionalInfo1 = mail.From.EMail,
                             AdditionalInfo2 = mail.Destination,
                             AdditionalInfo3 = mail.Subject
@@ -290,7 +293,7 @@ namespace ArchiveMonkey.Worker
                 }
             }
 
-            logger.Info("ActionGuid {0}: Archiving of {1} from {2} to {3} finished.", actionGuid, action.Item, action.SourceArchiveName, action.TargetArchiveName);
+            logger.Info("ActionGuid {0}: Archiving of {1} from {2} to {3} finished.", actionGuid, fullNetworkPathOfItem, action.SourceArchiveName, action.TargetArchiveName);
         }
 
         private Account ConnectToDavidServer()

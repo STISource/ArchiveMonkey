@@ -5,6 +5,7 @@ using ArchiveMonkey.Settings.Helpers;
 using ArchiveMonkey.Settings.Models;
 using ArchiveMonkey.Settings.Properties;
 using ArchiveMonkey.Services;
+using System.IO;
 
 namespace ArchiveMonkey.Settings.ViewModels
 {
@@ -175,6 +176,23 @@ namespace ArchiveMonkey.Settings.ViewModels
         private void ValidateSettings()
         {
             this.ValidationError = false;
+
+            foreach(var archive in this.settings.Archives)
+            {
+                if(!Directory.Exists(archive.FullLocalPath)
+                    || !Directory.Exists(archive.FullNetworkPath))
+                {
+                    this.ValidationError = true;
+                    this.ValidationErrorMessage = Resources.Settings_Validation_PathDoesNotExist;
+
+                    break;
+                }
+            }
+
+            if(this.ValidationError)
+            {
+                return;
+            }
 
             // validations
             foreach (var action in this.settings.ArchivingActionTemplates)

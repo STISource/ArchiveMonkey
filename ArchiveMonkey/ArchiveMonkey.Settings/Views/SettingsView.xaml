@@ -14,12 +14,27 @@
             <converters:IntToStringConverter x:Key="IntToStringConverter" />
         </Grid.Resources>
         <Grid.RowDefinitions>
+            <RowDefinition Height="1*" />
             <RowDefinition Height="2*" />
             <RowDefinition Height="3*" />
             <RowDefinition Height="30" />
             <RowDefinition Height="35" />
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions >
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Grid.Row="0" Content="Base Local Path" FontSize="14" FontWeight="Bold" />
+            <Label Grid.Column="1" Grid.Row="0" Content="Base Network Path" FontSize="14" FontWeight="Bold" />
+            <TextBox VerticalAlignment="Top" Height="20" Grid.Column="0" Grid.Row="1" Text="{Binding Settings.BaseLocalPath}" Margin="3" />
+            <TextBox VerticalAlignment="Top" Height="20" Grid.Column="1" Grid.Row="1" Text="{Binding Settings.BaseNetworkPath}" Margin="3" />
+        </Grid>
+        <Grid Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30" />
                 <RowDefinition Height="*" />
@@ -41,14 +56,17 @@
                       SelectedItem="{Binding SelectedArchive}" 
                       AutoGenerateColumns="False"
                       VerticalScrollBarVisibility="Auto"                      
-                      CanUserAddRows="False">
+                      CanUserAddRows="False"
+                      Margin="3">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Name" SortMemberPath="DisplayName" Binding="{Binding DisplayName}" />
-                    <DataGridTextColumn Header="Path" SortMemberPath="Path" Binding="{Binding Path}" />
+                    <DataGridTextColumn Header="Relative Path" SortMemberPath="Path" Binding="{Binding Path}" />
+                    <DataGridTextColumn Header="Full Local Path" SortMemberPath="Path" Binding="{Binding FullLocalPath}" IsReadOnly="True" />
+                    <DataGridTextColumn Header="Full Network Path" SortMemberPath="Path" Binding="{Binding FullNetworkPath}" IsReadOnly="True" />
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="20" />
                 <RowDefinition Height="30" />
@@ -71,7 +89,8 @@
                       SelectedItem="{Binding SelectedAction}" 
                       AutoGenerateColumns="False"
                       VerticalScrollBarVisibility="Auto"
-                      CanUserAddRows="False">
+                      CanUserAddRows="False"
+                      Margin="3">
                 <DataGrid.Columns>
                     <DataGridComboBoxColumn Header="From" ItemsSource="{Binding Root.DataContext.Settings.Archives, Source={StaticResource Proxy}}" SortMemberPath="InputArchive.DisplayName" SelectedItemBinding="{Binding InputArchive}" />
                     <DataGridComboBoxColumn Header="To" ItemsSource="{Binding Root.DataContext.Settings.Archives, Source={StaticResource Proxy}}" SortMemberPath="OutArchive.DisplayName" SelectedItemBinding="{Binding OutputArchive}" />
@@ -85,11 +104,11 @@
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
-        <Grid Grid.Row="2" Margin="3" Background="#FFDE0000" Visibility="{Binding ValidationError, Converter={StaticResource BoolToVisibilityConverter}}">
+        <Grid Grid.Row="3" Margin="3" Background="#FFDE0000" Visibility="{Binding ValidationError, Converter={StaticResource BoolToVisibilityConverter}}">
             <TextBlock Text="!!!" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0" Foreground="White" />
             <TextBlock Text="{Binding ValidationErrorMessage}" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="20,0,0,0" Foreground="White" />
         </Grid>
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="Save Settings" Command="{Binding SaveSettingsCommand}" Margin="5,1,5,6" />
         </StackPanel>
     </Grid>

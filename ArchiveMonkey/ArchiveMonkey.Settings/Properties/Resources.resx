@@ -126,6 +126,9 @@
   <data name="Settings_Validation_FilterInvalid" xml:space="preserve">
     <value>The provided filter could not be parsed.</value>
   </data>
+  <data name="Settings_Validation_PathDoesNotExist" xml:space="preserve">
+    <value>One or more of the specified Paths does not exist.</value>
+  </data>
   <data name="Settings_Validation_RetryCountNeedsRetryDelay" xml:space="preserve">
     <value>If Retry count  is set then a retry delay has to be provided.</value>
   </data>
