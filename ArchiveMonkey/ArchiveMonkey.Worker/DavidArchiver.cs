@@ -41,7 +41,7 @@ namespace ArchiveMonkey.Worker
 
             if(!historyEntries.Any())
             {
-                logger.Warn("No history entries found for {0}", action.SourceArchiveName);
+                logger.Warn("No history entries found for {0} - {1}", action.SourceArchiveName, action.FullNetworkSourcePath);
                 return;
             }
 

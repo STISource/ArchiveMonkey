@@ -34,7 +34,7 @@ namespace ArchiveMonkey.Worker
             var sourceArchive = this.WatchedArchivingActionTemplates.First().InputArchive;
 
             this.watcher = new FileSystemWatcher();
-            if(!Directory.Exists(sourceArchive.Path))
+            if(!Directory.Exists(sourceArchive.FullLocalPath))
             {
                 logger.Debug("Path does not exist: {0}", sourceArchive.Path);
                 throw new ArgumentException("Invalid input path");

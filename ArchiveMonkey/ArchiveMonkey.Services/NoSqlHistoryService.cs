@@ -33,7 +33,7 @@ namespace ArchiveMonkey.Services
                 var historyEntries = database.GetCollection<HistoryEntry>(CollectionName);
 
                 // get list. newest first!
-                results = historyEntries.Find(x => x.SourcePath == sourcePath).OrderByDescending(x => x.ArchivingDate).ToList();
+                results = historyEntries.Find(x => x.SourcePath.ToLower() == sourcePath.ToLower()).OrderByDescending(x => x.ArchivingDate).ToList();
 
                 // if there are already more history elements then desired, delete old ones
                 if(results.Count > MaxHistoryPerInputArchive)
