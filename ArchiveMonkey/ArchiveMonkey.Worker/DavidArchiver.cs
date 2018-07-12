@@ -298,20 +298,31 @@ namespace ArchiveMonkey.Worker
 
         private Account ConnectToDavidServer()
         {
-            var davidApi = new DavidAPIClass();
-            Account davidAccount = null;
-
-            if(string.IsNullOrEmpty(this.login.Username)
-                || string.IsNullOrEmpty(this.login.Password))
+            try
             {
-                davidAccount = davidApi.GetAccount(this.login.Server);
+                var davidApi = new DavidAPIClass();
+                Account davidAccount = null;
+
+                if (string.IsNullOrEmpty(this.login.Username)
+                    || string.IsNullOrEmpty(this.login.Password))
+                {
+                    davidAccount = davidApi.GetAccount(this.login.Server);
+                }
+                else
+                {
+                    davidAccount = davidApi.GetAccount(this.login.Server, this.login.Username, this.login.Password);
+                }
+
+                return davidAccount;
             }
-            else
+            catch(Exception ex)
             {
-                davidAccount = davidApi.GetAccount(this.login.Server, this.login.Username, this.login.Password);
+                logger.Error(ex, "Error while trying to connect to David. {0}", ex.Message);
+
+                Environment.FailFast("Archive Monkey needed to be stopped because a connection to the David server could not be established.");
             }
 
-            return davidAccount;
+            return null;
         }
     }
 }
