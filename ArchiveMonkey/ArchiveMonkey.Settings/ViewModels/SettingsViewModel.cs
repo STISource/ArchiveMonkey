@@ -142,6 +142,8 @@ namespace ArchiveMonkey.Settings.ViewModels
         public void NewArchive()
         {
             var archive = new Archive();
+            archive.BaseLocalPath = settings.BaseLocalPath;
+            archive.BaseNetworkPath = settings.BaseNetworkPath;
             this.Settings.Archives.Add(archive);
             this.SelectedArchive = archive;
         }

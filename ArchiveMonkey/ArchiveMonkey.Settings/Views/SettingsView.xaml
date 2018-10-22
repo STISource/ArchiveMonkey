@@ -60,7 +60,7 @@
                       Margin="3">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Name" SortMemberPath="DisplayName" Binding="{Binding DisplayName}" />
-                    <DataGridTextColumn Header="Relative Path" SortMemberPath="Path" Binding="{Binding Path}" />
+                    <DataGridTextColumn Header="Relative Path" SortMemberPath="Path" Binding="{Binding Path, UpdateSourceTrigger=PropertyChanged}" />
                     <DataGridTextColumn Header="Full Local Path" SortMemberPath="Path" Binding="{Binding FullLocalPath}" IsReadOnly="True" />
                     <DataGridTextColumn Header="Full Network Path" SortMemberPath="Path" Binding="{Binding FullNetworkPath}" IsReadOnly="True" />
                 </DataGrid.Columns>
