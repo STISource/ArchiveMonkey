@@ -92,8 +92,21 @@
                       CanUserAddRows="False"
                       Margin="3">
                 <DataGrid.Columns>
-                    <DataGridComboBoxColumn Header="From" ItemsSource="{Binding Root.DataContext.Settings.Archives, Source={StaticResource Proxy}}" SortMemberPath="InputArchive.DisplayName" SelectedItemBinding="{Binding InputArchive}" />
-                    <DataGridComboBoxColumn Header="To" ItemsSource="{Binding Root.DataContext.Settings.Archives, Source={StaticResource Proxy}}" SortMemberPath="OutArchive.DisplayName" SelectedItemBinding="{Binding OutputArchive}" />
+                    <DataGridComboBoxColumn Header="Source" ItemsSource="{Binding Root.DataContext.Settings.Archives, Source={StaticResource Proxy}}" SortMemberPath="InputArchive.DisplayName" SelectedItemBinding="{Binding InputArchive}" />
+                    <DataGridComboBoxColumn Header="Target" ItemsSource="{Binding Root.DataContext.Settings.Archives, Source={StaticResource Proxy}}" SortMemberPath="OutArchive.DisplayName" SelectedItemBinding="{Binding OutputArchive}" />
+                    <DataGridComboBoxColumn Header="Target (After DueDate)" ItemsSource="{Binding Root.DataContext.Settings.Archives, Source={StaticResource Proxy}}" SortMemberPath="OutputArchiveAfterDueDate.DisplayName" SelectedItemBinding="{Binding OutputArchiveAfterDueDate}" />
+                    <DataGridTemplateColumn Header="Due Date" SortMemberPath="DueDate">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding DueDate, StringFormat=yyyy-MM-dd}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <DatePicker SelectedDate="{Binding DueDate}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>                    
                     <DataGridComboBoxColumn Header="Action" ItemsSource="{Binding Root.DataContext.ArchivingActionTypes, Source={StaticResource Proxy}}" SelectedItemBinding="{Binding ActionType}" />
                     <DataGridCheckBoxColumn Header="Include Internal Items" Binding="{Binding IncludeInternalItems, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     <DataGridTextColumn Header="Custom Filter" Binding="{Binding Filter, Mode=TwoWay}" />

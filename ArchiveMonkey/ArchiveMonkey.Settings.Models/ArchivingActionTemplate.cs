@@ -13,14 +13,18 @@ namespace ArchiveMonkey.Settings.Models
         private ArchivingActionType actionType;
         private Guid inputArchiveId;
         private Guid outputArchiveId;
+        private Guid outputArchiveAfterDueDateId;
         private Archive inputArchive;
         private Archive outputArchive;
+        private Archive outputArchiveAfterDueDate;
+        private DateTime? dueDate;
         private int? retryCount;
         private int? retryDelay;
         private string filter;
         private int sequence;
         private bool handleSynchronously;
         private bool includeInternalItems;
+
 
         public ArchivingActionTemplate()
         {
@@ -100,7 +104,25 @@ namespace ArchiveMonkey.Settings.Models
                     this.RaisePropertyChanged("OutputArchiveId");
                 }
             }
-        }       
+        } 
+        
+        [DataMember(IsRequired = false)]
+        public Guid OutputArchiveAfterDueDateId
+        {
+            get
+            {
+                return this.outputArchiveAfterDueDateId;
+            }
+
+            set
+            {
+                if (this.outputArchiveAfterDueDateId != value)
+                {
+                    this.outputArchiveAfterDueDateId = value;
+                    this.RaisePropertyChanged("OutputArchiveAfterDueDateId");
+                }
+            }
+        }
 
         public Archive InputArchive
         {
@@ -132,8 +154,44 @@ namespace ArchiveMonkey.Settings.Models
                 if (this.outputArchive != value)
                 {
                     this.outputArchive = value;
-                    this.RaisePropertyChanged("OutputArchiveName");
+                    this.RaisePropertyChanged("OutputArchive");
                     this.outputArchiveId = value != null ? value.ArchiveId : Guid.Empty;
+                }
+            }
+        }
+
+        public Archive OutputArchiveAfterDueDate
+        {
+            get
+            {
+                return this.outputArchiveAfterDueDate;
+            }
+
+            set
+            {
+                if (this.outputArchiveAfterDueDate != value)
+                {
+                    this.outputArchiveAfterDueDate = value;
+                    this.RaisePropertyChanged("OutputArchiveAfterDueDate");
+                    this.outputArchiveAfterDueDateId = value != null ? value.ArchiveId : Guid.Empty;
+                }
+            }
+        }
+
+        [DataMember(IsRequired = false)]
+        public DateTime? DueDate
+        {
+            get
+            {
+                return this.dueDate;
+            }
+
+            set
+            {
+                if (this.dueDate != value)
+                {
+                    this.dueDate = value;
+                    this.RaisePropertyChanged("DueDate");                    
                 }
             }
         }

@@ -117,6 +117,7 @@ namespace ArchiveMonkey.Settings.Models
             {
                 action.InputArchive = this.Archives.SingleOrDefault(x => x.ArchiveId == action.InputArchiveId);
                 action.OutputArchive = this.Archives.SingleOrDefault(x => x.ArchiveId == action.OutputArchiveId);
+                action.OutputArchiveAfterDueDate = this.Archives.SingleOrDefault(x => x.ArchiveId == action.OutputArchiveAfterDueDateId);
             }
         }
     }    

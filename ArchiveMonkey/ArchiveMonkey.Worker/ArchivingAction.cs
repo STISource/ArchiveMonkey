@@ -1,5 +1,6 @@
 ﻿using ArchiveMonkey.Services;
 using ArchiveMonkey.Settings.Models;
+using System;
 
 namespace ArchiveMonkey.Worker
 {
@@ -7,6 +8,10 @@ namespace ArchiveMonkey.Worker
     {
         public static ArchivingAction FromTemplate(ArchivingActionTemplate template, IFilterService filterService, string item = null)
         {
+            var targetArchive = template.DueDate.HasValue && template.DueDate.Value < DateTime.Now && template.OutputArchiveAfterDueDate != null
+                                ? template.OutputArchiveAfterDueDate
+                                : template.OutputArchive;
+
             return new ArchivingAction
             {
                 ActionType = template.ActionType,
@@ -14,10 +19,10 @@ namespace ArchiveMonkey.Worker
                 FullLocalSourcePath = template.InputArchive.FullLocalPath,
                 FullNetworkSourcePath = template.InputArchive.FullNetworkPath,
                 SourceArchiveName = template.InputArchive.DisplayName,
-                RelativeTargetPath = template.OutputArchive.Path,
-                FullLocalTargetPath = template.OutputArchive.FullLocalPath,
-                FullNetworkTargetPath = template.OutputArchive.FullNetworkPath,
-                TargetArchiveName = template.OutputArchive.DisplayName,
+                RelativeTargetPath = targetArchive.Path,
+                FullLocalTargetPath = targetArchive.FullLocalPath,
+                FullNetworkTargetPath = targetArchive.FullNetworkPath,
+                TargetArchiveName = targetArchive.DisplayName,
                 Item = item,
                 RetryCount = template.RetryCount,
                 RetryDelay = template.RetryDelay,
@@ -41,7 +46,7 @@ namespace ArchiveMonkey.Worker
 
         public string FullNetworkTargetPath { get; set; }
 
-        public string TargetArchiveName { get; set; }
+        public string TargetArchiveName { get; set; }        
 
         public string Item { get; set; }
 
