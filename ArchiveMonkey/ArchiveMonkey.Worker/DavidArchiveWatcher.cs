@@ -37,7 +37,7 @@ namespace ArchiveMonkey.Worker
             if(!Directory.Exists(sourceArchive.FullLocalPath))
             {
                 logger.Debug("Path does not exist: {0}", sourceArchive.Path);
-                throw new ArgumentException("Invalid input path");
+                throw new ArgumentException("Invalid input path: " + sourceArchive.Path);
             }
             this.watcher.Path = sourceArchive.FullLocalPath;            
             this.watcher.IncludeSubdirectories = false;
